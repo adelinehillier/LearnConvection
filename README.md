@@ -2,7 +2,7 @@
 
 | Documentation |
 |---|
-| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://adelinehillier.github.io/LearnConvection.jl/stable) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://adelinehillier.github.io/LearnConvection.jl/dev) |
+| [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://adelinehillier.github.io/LearnConvection.jl) [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://adelinehillier.github.io/LearnConvection.jl/dev) |
 
 <!-- [![Build Status](https://github.com/adelinehillier/LearnConvection.jl/workflows/CI/badge.svg)](https://github.com/adelinehillier/LearnConvection.jl/actions)
 [![Coverage](https://codecov.io/gh/adelinehillier/LearnConvection.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/adelinehillier/LearnConvection.jl) -->
