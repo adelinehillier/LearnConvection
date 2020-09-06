@@ -1,0 +1,14 @@
+name = "LearnConvection"
+uuid = "1efcd936-9583-4ba6-bc6f-3cf9dd43d7d6"
+authors = ["Adeline Hillier <51460867+adelinehillier@users.noreply.github.com>"]
+version = "0.1.0"
+
+[deps]
+BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+NetCDF = "30363a11-5582-574a-97bb-aa9a979735b9"
+OceanTurb = "d848d694-35fd-11e9-1c91-9995598ac29e"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
