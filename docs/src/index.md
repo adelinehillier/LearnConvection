@@ -69,7 +69,7 @@ The problem specifies which mapping we are interested in, and therefore how the 
 | `Residual("TKE") TKEMassFlux.TKEParameters()`     | `` \text{TKE}(T[i]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(T[i]) `` |  
 
 Where T[i] is a D-length vector of values from the horizontally-averaged temperature profile at time index t=i.
-**Note that all model inputs are normalized using min-max scaling during pre-processing and un-normalized during post-processing.** If the profile is a temperature profile, this scaling is computed based on the profile at the initial timestep.
+**Note that all temperature profiles are normalized using min-max scaling during pre-processing and un-normalized during post-processing.** This scaling is computed based on the profile at the initial timestep.
 
 We take the model output and predict the profile from it as follows.
 
@@ -139,8 +139,8 @@ The kernel (or covariance) function sets the form of the interpolation function.
 | 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^{ - {\lVert x-x' \rVert}^2 / 2 \gamma^2 }`` |
 | 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^{ - \lVert x-x'\rVert / \gamma }`` |
 | 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^{-\sqrt{3} \lVert x-x'\rVert)/\gamma}`` |
-| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \sqrt{5}\lVert x-x'\rVert)/\gamma + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^(-√(5)*\lVert x-x'\rVert)/\gamma)`` |
-| 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^(-\alpha)`` |
+| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \sqrt{5}\lVert x-x'\rVert)/\gamma + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^{{(-√(5)*\lVert x-x'\rVert}/\gamma}`` |
+| 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^{-\alpha}`` |
 
 Where γ is a length-scale parameter, σ is a signal variance parameter, and α is an additional parameter used only in the rational quadratic kernel.
 
