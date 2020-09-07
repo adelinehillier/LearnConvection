@@ -69,7 +69,7 @@ end
 antiderivative_distance: computes the H⁻¹-norm w.r.t z of two vectors
 """
 function antiderivative_distance(a,b,z) # || diff(x).*diff(z) - diff(x').*diff(z) ||
-    return sqrt(sq_mag((diff(a).*diff(z) , diff(b).*diff(z))))
+    return sqrt(sq_mag(diff(a).*diff(z) , diff(b).*diff(z)))
 end
 
 # """

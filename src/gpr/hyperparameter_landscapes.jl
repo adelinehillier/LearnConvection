@@ -4,7 +4,7 @@ using StaticArrays
 # include("gp.jl")
 # include("errors.jl")
 
-function train_validate_test(train, validate, test, problem; log_γs=-0.4:0.1:0.4)
+function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-0.4:0.1:0.4)
     # Train GP on the filenames in train;
     # Optimize hyperparameter values by testing on filenames in validate;
     # Compute error on the filenames in test.
@@ -14,23 +14,28 @@ function train_validate_test(train, validate, test, problem; log_γs=-0.4:0.1:0.
     test_errors     = @MArray zeros(3,5)
 
     distances = [euclidean_distance, derivative_distance, antiderivative_distance]
-    for k in 1:4
-        for (i, d) in enumerate(distances)
-            min_logγ, min_error_validate, test_error = get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
-            min_logγs[k,i]       = min_logγ
-            validate_errors[k,i] = min_error_validate
-            test_errors[k,i]     = test_error
-        end
+    for k in 1:4, (i, d) in enumerate(distances)
+        min_logγ, min_error_validate, test_error = get_min_gamma(k, d, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
+        min_logγs[i,k]       = min_logγ
+        validate_errors[i,k] = min_error_validate
+        test_errors[i,k]     = test_error
     end
 
     # for rational quadratic kernel, have 2 hyperparameters to optimize
     k=5
     for (i, d) in enumerate([euclidean_distance, derivative_distance, antiderivative_distance])
-        min_logγ, min_error_validate, test_error = get_min_gamma_alpha(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
-        min_logγs[5,i]       = min_logγ
-        validate_errors[5,i] = min_error_validate
-        test_errors[5,i]     = test_error
+        min_logγ, min_error_validate, test_error = get_min_gamma_alpha(k, d, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
+        min_logγs[i,5]       = min_logγ
+        validate_errors[i,5] = min_error_validate
+        test_errors[i,5]     = test_error
     end
+
+    println("MIN LOG γs")
+    println("$(min_logγs)")
+    println("VALIDATE ME")
+    println("$(validate_errors)")
+    println("TEST ME")
+    println("$(test_errors)")
 
     return (min_logγs, validate_errors, test_errors)
 end
@@ -49,7 +54,7 @@ function get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γ
         # -----compute mean error for true check----
         errors_validate[i] = get_me_true_check(𝒢, 𝒟_validate)
     end
- 
+
     i                   = argmin(errors_validate)
     min_logγ            = log_γs[i]
     min_error_validate  = errors_validate[i]
@@ -92,7 +97,7 @@ function get_min_gamma_alpha(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; 
 
     for i in eachindex(log_γs), j in eachindex(log_αs)
 
-        kernel = get_kernel(k, logγ[i], 0.0, distance; α=log_αs[j])
+        kernel = get_kernel(k, log_γs[i], 0.0, distance; logα=log_αs[j])
         𝒢 = model(𝒟_train; kernel=kernel);
 
         # -----compute mean error for true check----
@@ -100,13 +105,13 @@ function get_min_gamma_alpha(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; 
     end
 
     m = argmin(errors_validate)
-    min_logγ = m[1]
-    min_logα = m[2]
+    min_logγ = log_γs[m[1]]
+    min_logα = log_αs[m[2]]
     min_error_validate = errors_validate[m]
 
     # using the log_γ value that minimizes the error on the validation set,
     # see how the model performs on the test set.
-    kernel = get_kernel(k, min_logγ, 0.0, distance; α=min_logα)
+    kernel = get_kernel(k, min_logγ, 0.0, distance; logα=min_logα)
     𝒢 = model(𝒟_train; kernel=kernel);
     error_test = get_me_true_check(𝒢, 𝒟_test)
 

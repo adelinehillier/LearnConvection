@@ -38,7 +38,8 @@ export  plot_landscapes_compare_error_metrics,
         plot_landscapes_compare_files_me,
         plot_error_histogram,
         get_min_gamma,
-        get_min_gamma_alpha
+        get_min_gamma_alpha,
+        train_validate_test
 
 include("plot_profile.jl")
 export  plot_profile,

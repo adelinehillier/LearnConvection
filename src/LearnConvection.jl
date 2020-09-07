@@ -35,6 +35,7 @@ export
         plot_error_histogram,
         get_min_gamma,
         get_min_gamma_alpha,
+        train_validate_test,
 
         # GaussianProcess / plot_profile
         plot_profile,
