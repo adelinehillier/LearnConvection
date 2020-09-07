@@ -6,7 +6,12 @@ function get_me_true_check(𝒢::GP, 𝒟::ProfileData)
 
     total_error = 0.0
     gpr_prediction = predict(𝒢, 𝒟; postprocessed=true)
-    n = 𝒟.Nt-1
+    # println("Nt-1$(𝒟.Nt-1)")
+    # println("pred$(length(gpr_prediction))")
+    # println("vavg$(length(𝒟.vavg))")
+
+    # n = 𝒟.Nt-1
+    n = length(gpr_prediction)
     for i in 1:n
         exact    = 𝒟.vavg[i]
         predi    = gpr_prediction[i]

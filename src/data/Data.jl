@@ -197,6 +197,7 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
         𝒟2 = data(filename, problem; D=D, N=N)
 
         v = hcat(v, 𝒟2.v) # unscaled
+        vavg = vcat(vavg, 𝒟2.vavg)
         x = vcat(x, 𝒟2.x)
         y = vcat(y, 𝒟2.y)
         validation_set = vcat(validation_set, 𝒟2.validation_set)
