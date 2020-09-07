@@ -81,20 +81,21 @@ ProfileData
 
 """
 struct ProfileData
-    v       ::Array
-    vavg    ::Array
-    x       ::Array
-    y       ::Array
-    x_train ::Array
-    y_train ::Array
-    validation_set::Array
-    z       ::Array
-    zavg    ::Array
-    t       ::Array
+    v       ::Array{Float64,2}
+    vavg    ::Array{Array{Float64,1},1}
+    x       ::Array{Array{Float64,1},1}
+    y       ::Array{Array{Float64,1},1}
+    x_train ::Array{Array{Float64,1},1}
+    y_train ::Array{Array{Float64,1},1}
+    validation_set::Vector{Int64}
+    z       ::Vector{Float64}
+    zavg    ::Vector{Float64}
+    t       ::Vector{Float64}
     Nt      ::Int64
-    n_train ::Int64
-    κₑ      ::Float64
+    # n_train ::Int64
+    # κₑ      ::Float64
     problem ::Problem
+    all_problems::Dict{Problem,Int64}
 end
 
 """
@@ -150,7 +151,11 @@ function data(filename::String, problem::Problem; D=16, N=4)
     x_train = x[training_set]
     y_train = y[training_set]
 
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, n_train, κₑ, problem)
+    # if the data contains multiple files, we'll need a way to postprocess the data separately for each one
+    # (preprocessing is already taken care of before the data is merged)
+    all_problems = Dict(problem => length(x))
+
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, problem, all_problems)
 end
 
 """
@@ -172,28 +177,38 @@ Returns an instance of ProfileData containing training data from multiple simula
                         If N=4, the profile data for every 4 timesteps will be reserved for training (~25% training data);
                         the rest will be used in the validation set.
 """
-function data(filenames, problem::Problem; D=16, N=4)
+function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
 
-Array{Array{Int64,1},1}
     # combines data from multiple files
     𝒟 = data(filenames[1], problem; D=D, N=N)
 
     v = 𝒟.v
+    vavg = 𝒟.vavg
+    x = 𝒟.x
+    y = 𝒟.y
     x_train = 𝒟.x_train
     y_train = 𝒟.y_train
+    validation_set = 𝒟.validation_set
+    all_problems = 𝒟.all_problems
+    t = 𝒟.t
+    Nt = 𝒟.Nt
 
     for filename in filenames[2:end]
-        data_b = data(filename, problem; D=D, N=N)
+        𝒟2 = data(filename, problem; D=D, N=N)
 
-        training_set = 1:N:(data_b.Nt-1)
-
-        v = hcat(v, data_b.v) # unscaled
-        x_train = vcat(x_train, data_b.x[training_set])
-        y_train = vcat(y_train, data_b.y[training_set])
+        v = hcat(v, 𝒟2.v) # unscaled
+        x = vcat(x, 𝒟2.x)
+        y = vcat(y, 𝒟2.y)
+        validation_set = vcat(validation_set, 𝒟2.validation_set)
+        x_train = vcat(x_train, 𝒟2.x_train)
+        y_train = vcat(y_train, 𝒟2.y_train)
+        all_problems[𝒟2.problem] = 𝒟2.all_problems[𝒟2.problem]
+        t = vcat(t, 𝒟2.t)
+        Nt += 𝒟2.Nt
     end
 
-    # ONLY v, x_train and y_train contain data from all filenames, the rest of the attributes are from the first filename in filenames
-    return ProfileData(v, 𝒟.vavg, 𝒟.x, 𝒟.y, x_train, y_train, 𝒟.validation_set, 𝒟.z, 𝒟.zavg, 𝒟.t, 𝒟.Nt, 𝒟.n_train, 𝒟.κₑ, 𝒟.problem)
+    # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems)
 end
 
 end # module

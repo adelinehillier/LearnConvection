@@ -204,8 +204,9 @@ function predict(𝒢::GP, 𝒟::ProfileData; postprocessed=true)
 
         # Predict temperature profile from start to finish without the training data.
         gpr_prediction = similar(𝒟.y)
-        gpr_prediction[1] = 𝒟.x[1] # starting profile
-        for i in 1:(𝒟.Nt-2)
+        gpr_prediction[1] = 𝒟.y[1] # starting profile
+
+        for i in 1:(length(𝒟.y)-1)
             y_prediction = model_output(gpr_prediction[i], 𝒢)
             gpr_prediction[i+1] = y_prediction
         end
@@ -213,20 +214,31 @@ function predict(𝒢::GP, 𝒟::ProfileData; postprocessed=true)
     elseif typeof(𝒟.problem) <: ResidualProblem
 
         # Predict temperature profile at each timestep using model-predicted difference between truth and physics-based model (KPP or TKE) prediction
-        x = 𝒟.x
-        gpr_prediction = [model_output(x[i], 𝒢) for i in 1:(𝒟.Nt)]
+        gpr_prediction = [model_output(𝒟.x[i], 𝒢) for i in 1:(𝒟.Nt)]
 
     else; throw(error)
-
     end
 
     if postprocessed == "both"
-        return (gpr_prediction, postprocess_prediction(𝒟.x, gpr_prediction, 𝒟.problem))
+        return (gpr_prediction, get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems))
     end
 
     if postprocessed
-        return postprocess_prediction(𝒟.x, gpr_prediction, 𝒟.problem)
+        return get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
     end
 
     return gpr_prediction
+end
+
+function get_postprocessed_predictions(x, gpr_prediction, all_problems)
+
+    result=Array{Array{Float64,1},1}()
+    i=1
+    for (problem, n_x) in all_problems # n_x: number of predictors for that problem
+        result = vcat(result, postprocess_prediction(x[i : i+n_x-1], gpr_prediction[i : i+n_x-1], problem))
+        i += n_x
+    end
+
+    return result
+
 end

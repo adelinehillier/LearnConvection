@@ -61,7 +61,7 @@ The `ProfileData` objects used for training, validation, and testing should be c
 The problem specifies which mapping we are interested in, and therefore how the data should be pre- and post-processed for the model. All problem structs are implemented in `src/gpr/problems.jl` and the scaling functions in `src/gpr/scalings.jl`. The mappings corresponding to each problem are as follows.
 
 | Problem | Predictor |       | Target     |
-| :---    | ---:     | :---: | :--- |
+| :---    | ---:      | :---: | :--- |
 | `Sequential("T")`    | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``T[i] `` |
 | `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``(T[i]-T[i-1])/ \Delta{t'} \approx \partial{t}(T)`` |
 | `Sequential("wT")`   | ``wT[i-1]`` | ``\xrightarrow{\text{model}} `` | ``wT[i] `` |
@@ -136,10 +136,10 @@ The kernel (or covariance) function sets the form of the interpolation function.
 
 | Kernel ID | Name        | Parameters | Equation |
 | :---:     |    :---     | :---       | :---     |
-| 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^( - ||x-x'||^2 / 2 \gamma^2 )`` |
-| 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^( - ||x-x'|| / \gamma )`` |
-| 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^(-\sqrt{3}*||x-x'||)/\gamma)`` |
-| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \sqrt{5}||x-x'||)/\gamma + 5||x-x'||^2/(3\gamma^2) ) e^(-√(5)*||x-x'||)/\gamma)`` |
+| 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^( - {\lVert x-x' \rVert}^2 / 2 \gamma^2 )`` |
+| 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^( - \lVert x-x'\rVert / \gamma )`` |
+| 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^(-\sqrt{3} \lVert x-x'\rVert)/\gamma)`` |
+| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \sqrt{5}\lVert x-x'\rVert)/\gamma + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^(-√(5)*\lVert x-x'\rVert)/\gamma)`` |
 | 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^(-\alpha)`` |
 
 Where γ is a length-scale parameter, σ is a signal variance parameter, and α is an additional parameter used only in the rational quadratic kernel.

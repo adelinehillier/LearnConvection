@@ -2,8 +2,34 @@
 using LearnConvection
 using Plots
 
-using LearnConvection.Data
-les = get_les_data("general_strat_16_profiles.jld2")
+D=16
+N=8
+
+problem  = Sequential("dT")
+
+train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
+𝒟_train = LearnConvection.Data.data(train, problem; D=D, N=N)
+𝒟_validate  = LearnConvection.Data.data("general_strat_16_profiles.jld2", problem; D=D, N=N)
+𝒟_test = LearnConvection.Data.data("general_strat_32_profiles.jld2", problem; D=D, N=N)
+
+𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel=get_kernel(4,0.0,0.0,euclidean_distance))
+predict(𝒢, 𝒟_train; postprocessed=true)
+LearnConvection.GaussianProcess.get_me_true_check(𝒢, 𝒟_validate)
+
+k=3
+distance=euclidean_distance
+get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=-0.4:0.1:0.4)
+
+
+##
+
+
+
+
+
+
+using LearnConvection
+using Plots
 
 # Construct a ProfileData object, 𝒟, consisting of the data to train on,
 # and a GP object, 𝒢, with which to perform the regression.

@@ -61,6 +61,7 @@ function postprocess_prediction(predictor, model_output, problem::Sequential_dT)
     prediction = [unscale(vec, problem.scaling) for vec in prediction]
 
     return prediction
+
 end
 
 # *--*--*--*--*--*--*--*--*--*--*
@@ -110,6 +111,8 @@ Returns the predicted temperature profile, T[i+1], computed from T[i] and G(T[i]
 `problem`: (Sequential_T)
 """
 function postprocess_prediction(predictor, prediction, problem::Sequential_T)
+    # println("prediction$([unscale(vec, problem.scaling) for vec in prediction])")
+
     return [unscale(vec, problem.scaling) for vec in prediction]
 end
 

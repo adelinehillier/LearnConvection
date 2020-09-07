@@ -12,6 +12,7 @@ function get_me_true_check(𝒢::GP, 𝒟::ProfileData)
         predi    = gpr_prediction[i]
         total_error += euclidean_distance(exact, predi) # euclidean distance
     end
+
     return total_error / n
 end
 
