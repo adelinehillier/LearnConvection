@@ -136,9 +136,9 @@ The kernel (or covariance) function sets the form of the interpolation function.
 
 | Kernel ID | Name        | Parameters | Equation |
 | :---:     |    :---     | :---       | :---     |
-| 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^( - {\lVert x-x' \rVert}^2 / 2 \gamma^2 )`` |
-| 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^( - \lVert x-x'\rVert / \gamma )`` |
-| 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^(-\sqrt{3} \lVert x-x'\rVert)/\gamma)`` |
+| 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^{ - {\lVert x-x' \rVert}^2 / 2 \gamma^2 }`` |
+| 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^{ - \lVert x-x'\rVert / \gamma }`` |
+| 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^{-\sqrt{3} \lVert x-x'\rVert)/\gamma}`` |
 | 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \sqrt{5}\lVert x-x'\rVert)/\gamma + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^(-√(5)*\lVert x-x'\rVert)/\gamma)`` |
 | 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^(-\alpha)`` |
 

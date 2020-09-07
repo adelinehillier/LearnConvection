@@ -11,5 +11,5 @@ makedocs(
 # See "Hosting Documentation" and deploydocs() in the Documenter manual
 # for more information.
 deploydocs(
-    repo = "https://github.com/adelinehillier/LearnConvection"
+    repo = "https://github.com/adelinehillier/LearnConvection.git"
 )
