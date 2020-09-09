@@ -234,7 +234,11 @@ function get_postprocessed_predictions(x, gpr_prediction, all_problems)
 
     result=Array{Array{Float64,1},1}()
     i=1
+
+    println("length second opinion $(length(all_problems))")
+
     for (problem, n_x) in all_problems # n_x: number of predictors for that problem
+        println(n_x)
         result = vcat(result, postprocess_prediction(x[i : i+n_x-1], gpr_prediction[i : i+n_x-1], problem))
         i += n_x
     end

@@ -10,6 +10,7 @@ Data module for preparing data for analysis with
 module Data
 
 using OceanTurb
+using OrderedCollections
 
 include("../les/custom_avg.jl")
 
@@ -95,7 +96,7 @@ struct ProfileData
     # n_train ::Int64
     # κₑ      ::Float64
     problem ::Problem
-    all_problems::Dict{Problem,Int64}
+    all_problems::Array{Array{Any,1},1}
 end
 
 """
@@ -153,7 +154,7 @@ function data(filename::String, problem::Problem; D=16, N=4)
 
     # if the data contains multiple files, we'll need a way to postprocess the data separately for each one
     # (preprocessing is already taken care of before the data is merged)
-    all_problems = Dict(problem => length(x))
+    all_problems = [[problem, length(x)]]
 
     return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, problem, all_problems)
 end
@@ -190,6 +191,7 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
     y_train = 𝒟.y_train
     validation_set = 𝒟.validation_set
     all_problems = 𝒟.all_problems
+
     t = 𝒟.t
     Nt = 𝒟.Nt
 
@@ -203,9 +205,15 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
         validation_set = vcat(validation_set, 𝒟2.validation_set)
         x_train = vcat(x_train, 𝒟2.x_train)
         y_train = vcat(y_train, 𝒟2.y_train)
-        all_problems[𝒟2.problem] = 𝒟2.all_problems[𝒟2.problem]
+        append!(all_problems, 𝒟2.all_problems)
         t = vcat(t, 𝒟2.t)
         Nt += 𝒟2.Nt
+    end
+
+    println("length $(length(all_problems))")
+
+    for (x,y) in all_problems
+        println("data $(y)")
     end
 
     # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
