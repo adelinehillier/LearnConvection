@@ -210,12 +210,6 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
         Nt += 𝒟2.Nt
     end
 
-    println("length $(length(all_problems))")
-
-    for (x,y) in all_problems
-        println("data $(y)")
-    end
-
     # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
     return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems)
 end
