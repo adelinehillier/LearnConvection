@@ -148,18 +148,19 @@ Where γ is a length-scale parameter, σ is a signal variance parameter, and α 
 
 In this example, we train our model and test our model on the data from the same simulation.
 ```julia
-# problems
-params   = KPP.Parameters( )
+# problem
+params   = KPP.Parameters()
 problem  = Residual("KPP", params)
 
 # data
-filename = "general_strat_32_profiles.jld2"
+train    = ["general_strat_4_profiles.jld2", "general_strat_16_profiles.jld2"]
+test     = "general_strat_32_profiles.jld2"
 D        = 16
 N        = 4
 
 # kernel
 k        = 1
-logγ     = -3.0
+logγ     = 0.4
 logσ     = 0.0
 distance = euclidean_distance
 kernel   = get_kernel(k, logγ, logσ, distance)

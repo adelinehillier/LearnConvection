@@ -70,6 +70,7 @@ function animate_profile_and_model_output(𝒢, 𝒟)
     variable = 𝒟.problem.variable # "T" or "wT"
     xlims1 = x_lims[variable]
     xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.02)
+    # xlims2 = (minimum(minimum(𝒟.y)), maximum(maximum(𝒟.y)))
 
     model_output, predi = predict(𝒢, 𝒟; postprocessed="both")
 
