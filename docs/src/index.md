@@ -139,7 +139,7 @@ The kernel (or covariance) function sets the form of the interpolation function.
 | 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^{ - {\lVert x-x' \rVert}^2 / 2 \gamma^2 }`` |
 | 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^{ - \lVert x-x'\rVert / \gamma }`` |
 | 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^{-\sqrt{3} \lVert x-x'\rVert)/\gamma}`` |
-| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \sqrt{5}\lVert x-x'\rVert)/\gamma + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^{{(-√(5)*\lVert x-x'\rVert}/\gamma}`` |
+| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \frac{\sqrt{5}\lVert x-x'\rVert}{\gamma} + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^{{-√(5)*\lVert x-x'\rVert}/\gamma}`` |
 | 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^{-\alpha}`` |
 
 Where γ is a length-scale parameter, σ is a signal variance parameter, and α is an additional parameter used only in the rational quadratic kernel.
@@ -171,8 +171,16 @@ kernel   = get_kernel(k, logγ, logσ, distance)
 # model
 𝒢 = LearnConvection.GaussianProcess.model(𝒟; kernel = kernel)
 
-# Animate the mean GP prediction.
-anim = animate_profile(𝒢, 𝒟)
-gif(anim, "animated_profile.gif")
+# data
+𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
+𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
 
+# 𝒢 is trained on 𝒟_train
+𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
+
+# animate the mean prediction, where 𝒢 is tested on 𝒟_test
+anim = animate_profile_and_model_output(𝒢, 𝒟_test)
+gif(anim, "basic_example.gif")
 ```
+
+![Basic Example result](./figures/basic_example.gif)
