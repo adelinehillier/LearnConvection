@@ -120,8 +120,6 @@ Here we concern ourselves with the mean GP prediction.
 
 The kernel (or covariance) function sets the form of the interpolation function.
 
-d(x,x')
-
 | Kernel ID | Name        | Parameters | Equation |
 | :---:     |    :---     | :---       | :---     |
 | 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^{ - {d(x,x')}^2 / 2 \gamma^2 }`` |
@@ -130,7 +128,7 @@ d(x,x')
 | 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \frac{\sqrt{5}d(x,x')}{\gamma} + \frac{5{d(x,x')}^2}{3\gamma^2} ) e^{-√(5) \frac{d(x,x')}{\gamma}}`` |
 | 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^{-\alpha}`` |
 
-Where γ is a length-scale parameter, σ is a signal variance parameter, and α is an additional parameter used only in the rational quadratic kernel.
+Where γ is a length-scale parameter, σ is a signal variance parameter, α is an additional parameter used only in the rational quadratic kernel, and ``d`` is the distance metric used in the kernel function. The options for ``d`` are `euclidean_distance`, `derivative_distance`, and `antiderivative_distance`.
 
 ### Basic Example
 
