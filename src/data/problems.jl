@@ -52,10 +52,10 @@ end
 
 """
 get_problem(problem::Problem, data::OceananigansData, timeseries)
------ Description
+# Description
     Creates an instance of a Problem struct depending on the type of mapping.
     Returns the problem and the correct data array from the OceananigansData objectssociated with the variable of interest.
------ Arguments
+# Arguments
 - 'problem': (SequentialProblem).  what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"))
 - 'les': (OceananigansData).       what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"))
 - 'N²': (Number)                   initial buoyancy stratification

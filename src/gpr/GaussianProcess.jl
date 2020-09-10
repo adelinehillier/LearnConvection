@@ -50,12 +50,26 @@ export  plot_profile,
 export get_kernel
 
 """
+```get_kernel(kernel_id::Int64, logγ, logσ, distance; logα=0.0)```
+
+# Description
+Returns a Kernel object with the specified parameters.
+
+# Arguments
+- `kernel_id`: (Int64). Identification number for the kernel type (see kernel options)
+- `logγ`: (Float64). Log(length scale) parameter.
+- `logσ`: (Float64). Log(signal variance) parameter.
+- `distance`: (Function). Distance function to use in the kernel.
+
+# Keyword Arguments
+- `logα`: (Float64). Log(α) parameter if kernel_id = 5.
+
 # kernel options
-#  1   =>   "Squared exponential"         => "Squared exponential kernel:        k(x,x') = σ * exp( - ||x-x'||² / 2γ² )",
-#  2   =>   "Matern 1/2"                  => "Matérn with ʋ=1/2:                 k(x,x') = σ * exp( - ||x-x'|| / γ )",
-#  3   =>   "Matern 3/2"                  => "Matérn with ʋ=3/2:                 k(x,x') = σ * (1+c) * exp(-√(3)*||x-x'||)/γ)",
-#  4   =>   "Matern 5/2"                  => "Matérn with ʋ=5/2:                 k(x,x') = σ * ( 1 + √(5)*||x-x'||)/γ + 5*||x-x'||²/(3*γ^2) ) * exp(-√(5)*||x-x'||)/γ)",
-#  5   =>   "Rational quadratic w/ α=1"   => "Rational quadratic kernel:         k(x,x') = σ * (1+(x-x')'*(x-x')/(2*α*(γ²))^(-α)",
+ 1   =>   "Squared exponential kernel:        k(x,x') = σ * exp( - d(x,x')² / 2γ² )",
+ 2   =>   "Matérn with ʋ=1/2:                 k(x,x') = σ * exp( - d(x,x') / γ )",
+ 3   =>   "Matérn with ʋ=3/2:                 k(x,x') = σ * (1+c) * exp(-√(3)*d(x,x'))/γ)",
+ 4   =>   "Matérn with ʋ=5/2:                 k(x,x') = σ * ( 1 + √(5)*d(x,x'))/γ + 5*d(x,x')²/(3*γ^2) ) * exp(-√(5)*d(x,x'))/γ)",
+ 5   =>   "Rational quadratic kernel:         k(x,x') = σ * (1+(x-x')'*(x-x')/(2*α*(γ²))^(-α)",
 """
 function get_kernel(kernel_id::Int64, logγ, logσ, distance; logα=0.0)
         # convert from log10 scale

@@ -1,19 +1,5 @@
-```@meta
-CurrentModule = LearnConvection
-```
 
 # LearnConvection.jl
-
-```@index
-```
-
-```@autodocs
-Modules = [LearnConvection]
-```
-
-```@docs
-data(filename::String, problem::Problem; D=16, N=4)
-```
 
 ### Simulation data
 
@@ -63,7 +49,7 @@ The problem specifies which mapping we are interested in, and therefore how the 
 | Problem | Predictor |       | Target     |
 | :---    | ---:      | :---: | :--- |
 | `Sequential("T")`    | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``T[i] `` |
-| `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``(T[i]-T[i-1])/ \Delta{t'} \approx \partial{t}(T)`` |
+| `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``(T[i]-T[i-1])/ \Delta{t'}`` |
 | `Sequential("wT")`   | ``wT[i-1]`` | ``\xrightarrow{\text{model}} `` | ``wT[i] `` |
 | `Residual("KPP", KPP.Parameters())` | ``\text{KPP}(T[i])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(T[i]) `` |  
 | `Residual("TKE") TKEMassFlux.TKEParameters()`     | `` \text{TKE}(T[i]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(T[i]) `` |  
@@ -134,12 +120,14 @@ Here we concern ourselves with the mean GP prediction.
 
 The kernel (or covariance) function sets the form of the interpolation function.
 
+d(x,x')
+
 | Kernel ID | Name        | Parameters | Equation |
 | :---:     |    :---     | :---       | :---     |
-| 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^{ - {\lVert x-x' \rVert}^2 / 2 \gamma^2 }`` |
-| 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^{ - \lVert x-x'\rVert / \gamma }`` |
-| 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^{-\sqrt{3} \lVert x-x'\rVert)/\gamma}`` |
-| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \frac{\sqrt{5}\lVert x-x'\rVert}{\gamma} + 5{\lVert x-x'\rVert}^2/(3\gamma^2) ) e^{{-√(5)*\lVert x-x'\rVert}/\gamma}`` |
+| 1         | Squared exponential     | γ, σ | ``k(x,x') = \sigma e^{ - {d(x,x')}^2 / 2 \gamma^2 }`` |
+| 2         | Matérn with ʋ=1/2       | γ, σ | ``k(x,x') = \sigma e^{ - d(x,x') / \gamma }`` |
+| 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^{-\sqrt{3} d(x,x'))/\gamma}`` |
+| 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \frac{\sqrt{5}d(x,x')}{\gamma} + \frac{5{d(x,x')}^2}{3\gamma^2} ) e^{-√(5) \frac{d(x,x')}{\gamma}}`` |
 | 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^{-\alpha}`` |
 
 Where γ is a length-scale parameter, σ is a signal variance parameter, and α is an additional parameter used only in the rational quadratic kernel.
@@ -166,21 +154,18 @@ distance = euclidean_distance
 kernel   = get_kernel(k, logγ, logσ, distance)
 
 # data
-𝒟 = LearnConvection.Data.data(filename, problem; D=D, N=N)
-
-# model
-𝒢 = LearnConvection.GaussianProcess.model(𝒟; kernel = kernel)
-
-# data
 𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
 𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
 
 # 𝒢 is trained on 𝒟_train
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
 
-# animate the mean prediction, where 𝒢 is tested on 𝒟_test
+# animate the mean GP prediction, where 𝒢 is tested on 𝒟_test
 anim = animate_profile_and_model_output(𝒢, 𝒟_test)
 gif(anim, "basic_example.gif")
 ```
+This should output the following animation.
 
-![Basic Example result](./figures/basic_example.gif)
+![Basic Example result](../../examples/gpr/demo/figures/basic_example.gif)
+
+Where the plot on the left shows the mean GP prediction (blue dots) on the test data compared to the truth from the LES test simulation (orange line), and the plot on the right shows the direct model output (blue dots) compared to the target (orange line).

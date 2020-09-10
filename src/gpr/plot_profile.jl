@@ -9,11 +9,11 @@ Plots the simulation profile at a single given index in the data timeseries alon
 corresponding GP prediction (prediciting on the training data). i.e. produces a snapshot of the profile evolution.
 The gpr_prediction is computed outside this function for efficiency.
 ----- Arguments
-- '𝒢' (GP). The GP object
-- '𝒟' (ProfileData). The ProfileData object used for training and testing.
-- 'V_name' (ProfileData). The ProfileData object whose starting profile will be evolved forward using 𝒢.
-- 'time_index' (Int). The time index
-- 'gpr_prediction' (Array). Output of get_gpr_pred (which should only be computed once) on 𝒢 and 𝒟.
+- `𝒢` (GP). The GP object
+- `𝒟` (ProfileData). The ProfileData object used for training and testing.
+- `V_name` (ProfileData). The ProfileData object whose starting profile will be evolved forward using 𝒢.
+- `time_index` (Int). The time index
+- `gpr_prediction` (Array). Output of get_gpr_pred (which should only be computed once) on 𝒢 and 𝒟.
 """
 function plot_profile(𝒢::GP, 𝒟::ProfileData, time_index, gpr_prediction)
 

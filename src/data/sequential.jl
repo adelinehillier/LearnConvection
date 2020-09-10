@@ -16,16 +16,16 @@ Data pre- / post-processing for sequential problems. Takes a ProfileData object 
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 
 """
-get_predictors_targets(vavg::Array, problem::Sequential_T)
------ Description
+`get_predictors_targets(vavg::Array, problem::Sequential_T)`
+# Description
     Returns x and y, the scaled predictor and target pairs from which to extract the training and verification data sets for "T" profiles.
 
     model( predictor ) -> target
          model( T[i] ) -> (T[i+1]-T[i])/Δt ≈ ∂t(T)
 
------ Arguments
-- 'vavg': (Array)                Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
-- 'problem': (Sequential_dT)     Sequential_T object associated with the data (output of get_problem)
+# Arguments
+- `vavg`: (Array)                Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
+- `problem`: (Sequential_dT)     Sequential_T object associated with the data (output of get_problem)
 """
 function get_predictors_targets(vavg::Array, problem::Sequential_dT)
 
@@ -44,6 +44,8 @@ function get_predictors_targets(vavg::Array, problem::Sequential_dT)
 end
 
 """
+`postprocess_prediction(predictor, model_output, problem::Sequential_dT)`
+
 # Description
 Takes in a scaled predictor, T[i], the scaled model output on the predictor, model(T[i]), and a Sequential_T object.
 Returns the unscaled prediction (predicted temperature profile), T[i+1], computed from T[i] and model(T[i]) by
@@ -70,7 +72,8 @@ end
 # *--*--*--*--*--*--*--*--*--*--*
 
 """
-get_predictors_targets(vavg::Array, problem::Sequential_T)
+`get_predictors_targets(vavg::Array, problem::Sequential_T)`
+
 # Description
     Returns x and y, the predictors and target predictions from which to extract the training and verification data for "T" profiles.
 
@@ -98,14 +101,16 @@ function get_predictors_targets(vavg, problem::Sequential_T)
 end
 
 """
------ Description
+`postprocess_prediction(predictor, prediction, problem::Sequential_T)`
+
+# Description
 Takes in a scaled predictor, T[i], the scaled GP prediction on the predictor, G(T[i]), and a Sequential_T object.
 Returns the predicted temperature profile, T[i+1], computed from T[i] and G(T[i]) by
 
            prediction = model( predictor )
      predicted T[i+1] = model( T[i] )
 
------ Arguments
+# Arguments
 `predictor`: (Array)            T[i], the scaled predictor for a temperature profile
 `prediction`: (Array)           model(T[i), the scaled prediction for a temperature profile
 `problem`: (Sequential_T)
@@ -122,7 +127,8 @@ end
 # *--*--*--*--*--*--*--*--*--*--*
 
 """
-get_predictors_targets(vavg::Array, problem::Sequential_wT)
+`get_predictors_targets(vavg, problem::Sequential_wT)`
+
 # Description
     Returns x and y, the predictors and targets from which to extract the training and verification data for "wT" profiles.
 
@@ -150,14 +156,16 @@ function get_predictors_targets(vavg, problem::Sequential_wT)
 end
 
 """
------ Description
+`postprocess_prediction(predictor, prediction, problem::Sequential_wT)`
+
+# Description
 Takes in a scaled predictor, wT[i], the scaled model prediction on the predictor, model(wT[i]), and a Sequential_wT object.
 Returns the temperature profile, T[i+1], computed from model(T[i]) by
 
            prediction = model(predictor)
     predicted wT[i+1] = model(wT[i])
 
------ Arguments
+# Arguments
 `predictor`: (Array)                wT[i], the predictor for a wT profile
 `prediction`: (Array)               predicted wT[i+1], the model prediction for a wT profile
 `problem`: (Sequential_wT)          Sequential_wT object associated with the data
