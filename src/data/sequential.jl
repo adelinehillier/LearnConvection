@@ -53,9 +53,9 @@ Returns the unscaled prediction (predicted temperature profile), T[i+1], compute
     predicted T[i+1] = model(T[i])Δt + T[i]
 
 # Arguments
-`predictor`: (Array)            T[i], the scaled predictor for a temperature profile
-`model_output`: (Array)         model(T[i]), the scaled model output for a temperature profile
-`problem`: (Sequential_dT)
+- `predictor`: (Array)            T[i], the scaled predictor for a temperature profile
+- `model_output`: (Array)         model(T[i]), the scaled model output for a temperature profile
+- `problem`: (Sequential_dT)
 """
 function postprocess_prediction(predictor, model_output, problem::Sequential_dT)
 
@@ -111,9 +111,9 @@ Returns the predicted temperature profile, T[i+1], computed from T[i] and G(T[i]
      predicted T[i+1] = model( T[i] )
 
 # Arguments
-`predictor`: (Array)            T[i], the scaled predictor for a temperature profile
-`prediction`: (Array)           model(T[i), the scaled prediction for a temperature profile
-`problem`: (Sequential_T)
+- `predictor`: (Array)            T[i], the scaled predictor for a temperature profile
+- `prediction`: (Array)           model(T[i), the scaled prediction for a temperature profile
+- `problem`: (Sequential_T)
 """
 function postprocess_prediction(predictor, prediction, problem::Sequential_T)
     # println("prediction$([unscale(vec, problem.scaling) for vec in prediction])")
@@ -166,9 +166,9 @@ Returns the temperature profile, T[i+1], computed from model(T[i]) by
     predicted wT[i+1] = model(wT[i])
 
 # Arguments
-`predictor`: (Array)                wT[i], the predictor for a wT profile
-`prediction`: (Array)               predicted wT[i+1], the model prediction for a wT profile
-`problem`: (Sequential_wT)          Sequential_wT object associated with the data
+- `predictor`: (Array)                wT[i], the predictor for a wT profile
+- `prediction`: (Array)               predicted wT[i+1], the model prediction for a wT profile
+- `problem`: (Sequential_wT)          Sequential_wT object associated with the data
 """
 function postprocess_prediction(predictor, prediction, problem::Sequential_wT)
     # prediction = [unscale(vec, problem.scaling) for vec in prediction]

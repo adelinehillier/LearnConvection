@@ -76,9 +76,9 @@ Returns the predicted temperature profile, T[i+1], computed from T[i] and G(T[i]
      predicted T[i+1] = model(KPP(T[i])) + KPP(T[i])
 
 # Arguments
-`predictor`: (Array)            T[i], the predictor for a temperature profile
-`prediction`: (Array)           model(T[i), the prediction for a temperature profile
-`problem`: (Residual_KPP)
+- `predictor`: (Array)            T[i], the predictor for a temperature profile
+- `prediction`: (Array)           model(T[i), the prediction for a temperature profile
+- `problem`: (Residual_KPP)
 """
 function postprocess_prediction(predictor, prediction, problem::Union{Residual_KPP, Residual_TKE})
 
