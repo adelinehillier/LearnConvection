@@ -31,16 +31,18 @@ gif(anim, "all.gif")
 
 ## Extrapolation
 
-train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
-test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
+# train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
+# test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
+train = ["general_strat_4_profiles.jld2"]
+test = ["general_strat_32_profiles.jld2"]
 
 # problem  = Sequential("T")
-problem  = Sequential("dT")
+problem   = Sequential("dT")
 # problem  = Residual("KPP", KPP.Parameters())
 # problem  = Residual("TKE", TKEMassFlux.TKEParameters())
 
 k = 2
-logγ = -0.4
+logγ = 0.0
 distance = euclidean_distance
 kernel   = get_kernel(k, logγ, 0.0, distance)
 
@@ -51,7 +53,7 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 
 anim = animate_profile_and_model_output(𝒢, 𝒟_test)
 # gif(anim, "animated_profile_and_model_output.gif")
-gif(anim, "all.gif")
+gif(anim, "all2.gif")
 
 
 ## Example for documentation
@@ -75,8 +77,8 @@ distance = antiderivative_distance
 kernel   = get_kernel(k, logγ, 0.0, distance)
 
 # data
-𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
-𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
+𝒟_train  = LearnConvection.Data.data(train, problem; D=D, N=N);
+𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
 
 # model 𝒢 trained on 𝒟_train
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)

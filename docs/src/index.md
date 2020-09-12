@@ -46,26 +46,33 @@ The `ProfileData` objects used for training, validation, and testing should be c
 
 The problem specifies which mapping we are interested in, and therefore how the data should be pre- and post-processed for the model. All problem structs are implemented in `src/gpr/problems.jl` and the scaling functions in `src/gpr/scalings.jl`. The mappings corresponding to each problem are as follows.
 
-| Problem | Predictor |       | Target     |
-| :---    | ---:      | :---: | :--- |
+| Problem | Predictor  |       | Target     |
+| :---    | ---:       | :---: | :--- |
 | `Sequential("T")`    | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``T[i] `` |
 | `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``(T[i]-T[i-1])/ \Delta{t'}`` |
 | `Sequential("wT")`   | ``wT[i-1]`` | ``\xrightarrow{\text{model}} `` | ``wT[i] `` |
-| `Residual("KPP", KPP.Parameters())` | ``\text{KPP}(T[i])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(T[i]) `` |  
-| `Residual("TKE") TKEMassFlux.TKEParameters()`     | `` \text{TKE}(T[i]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(T[i]) `` |  
+| `Sequential("KPP",Θ)`  | ``\text{KPP}(i;T[i-1])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(i;T[i-1]) ``   |  
+| `Sequential("TKE",Θ)`  | `` \text{TKE}(i;T[i-1]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(i;T[i-1]) `` |  
+| `Residual("KPP",Θ)` | ``\text{KPP}(i;T[0])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(i;T[0]) `` |  
+| `Residual("TKE",Θ)` | `` \text{TKE}(i;T[0]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(i;T[0]) `` |  
 
-Where T[i] is a D-length vector of values from the horizontally-averaged temperature profile at time index t=i.
+Where T[i] is a D-length vector of values from the horizontally-averaged temperature profile at time index i, ``\Delta{t}`` is the time interval between steps, ``N^2`` is the initial buoyancy stratification, ``\Delta{t'}`` is a rescaled time interval equal to ``\Delta{t} / N^2``, and Θ refers to the parameters for the KPP or TKE simulations (e.g. `KPP.Parameters()` or `TKEMassFlux.TKEParameters()` to use the default parameter values defined in [OceanTurb.jl](https://github.com/glwagner/OceanTurb.jl)).
+
+``KPP(i;T[0])`` and ``TKE(i;T[0])`` are the KPP and TKE model predictions, respectively, for ``T[i]`` given initial condition ``T[0]``, and ``KPP(i;T[i-1])`` and ``TKE(i;T[i-1])`` are the KPP and TKE model predictions, respectively, for ``T[i]`` given initial condition ``T[i-1]``.
+
 **Note that all temperature profiles are normalized using min-max scaling during pre-processing and un-normalized during post-processing.** This scaling is computed based on the profile at the initial timestep.
 
 We take the model output and predict the profile from it as follows.
 
-| Problem | Prediction |
-| :---    | :---       |
-| `Sequential("T")`       | ``f(T[i-1]) = model(T[i-1])``  |
-| `Sequential("dT")`      | ``f(T[i-1]) = model(T[i-1])\Delta{t} + T[i-1]``  |
-| `Sequential("wT")`      | ``f(wT[i-1]) = model(wT[i-1])`` |
-| `Residual("KPP", KPP.Parameters())` | ``f(T[i]) = {model}({KPP}(T[i])) + {KPP}(T[i])`` |  
-| `Residual("TKE") TKEMassFlux.TKEParameters()`     | ``f(T[i]) = {model}({TKE}(T[i])) + {TKE}(T[i])`` |
+| Problem | Prediction   |
+| :---    | :---         |
+| `Sequential("T")`      | ``f(T[i-1]) = model(T[i-1])``  |
+| `Sequential("dT")`     | ``f(T[i-1]) = model(T[i-1])\Delta{t} + T[i-1]``  |
+| `Sequential("wT")`     | ``f(wT[i-1]) = model(wT[i-1])`` |
+| `Sequential("KPP",Θ)`   | ``f(KPP(i;T[i-1])) = {model}(KPP(i;T[i-1])) + KPP(i;T[i-1])`` |  
+| `Sequential("TKE",Θ)`  | ``f(TKE(i;T[i-1])) = {model}(TKE(i;T[i-1])) + TKE(i;T[i-1])`` |
+| `Residual("KPP",Θ)`    | ``f(KPP(i;T[0])) = {model}(KPP(i;T[0])) + KPP(i;T[0])`` |  
+| `Residual("TKE",Θ)`    | ``f(TKE(i;T[0])) = {model}(TKE(i;T[0])) + TKE(i;T[0])`` |
 
 Where ``model(\mathbf{x})`` is the direct model output on predictor ``\mathbf{x}``, which we hope will be close to the target.
 
@@ -152,8 +159,8 @@ distance = euclidean_distance
 kernel   = get_kernel(k, logγ, logσ, distance)
 
 # data
-𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
-𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
+𝒟_train  = LearnConvection.Data.data(train, problem; D=D, N=N);
+𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
 
 # 𝒢 is trained on 𝒟_train
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)

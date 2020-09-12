@@ -38,7 +38,7 @@ function get_predictors_targets(vavg::Array, problem::Sequential_dT)
 
     # calculate predictors and targets from the scaled data
     predictors = vavg[1:end-1] # T[i] for i = 1, ..., Nt-1
-    targets = (vavg[2:end] - predictors) / problem.Δt # (T[i+1]-T[i])/Δt
+    targets = (vavg[2:end] - predictors) / problem.Δt # (T[i+1]-T[i])/Δt'
 
     return (predictors, targets)
 end
