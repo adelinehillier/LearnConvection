@@ -174,3 +174,11 @@ This should output the following animation.
 ![Basic Example result](../../examples/gpr/demo/figures/basic_example.gif)
 
 Where the plot on the left shows the mean GP prediction (blue dots) on the test data compared to the truth from the LES test simulation (orange line), and the plot on the right shows the direct model output (blue dots) compared to the target (orange line).
+
+### Interactive example
+
+Run `examples/gpr/interact.jl` for an interactive exploration of GPR that uses [Interact.jl](https://github.com/JuliaGizmos/Interact.jl) and [Blink.jl](https://github.com/JuliaGizmos/Blink.jl).
+
+![Interact example 1](../../examples/gpr/demo/figures/interact_1.gif)
+
+![Interact example 2](../../examples/gpr/demo/figures/interact_2.gif)

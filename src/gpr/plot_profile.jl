@@ -88,13 +88,13 @@ function animate_profile_and_model_output(𝒢, 𝒟)
         day_string = string(floor(Int, 𝒟.t[i]/86400))
 
         exact = 𝒟.v[:,i]
-        p1 = scatter(predi[i], 𝒟.zavg, label = "GP");
+        p1 = scatter(predi[i], 𝒟.zavg, label = "GP mean prediction");
         plot!(exact, 𝒟.z, legend = :topleft, label = "LES", xlabel = "$(long_name[variable])", ylabel = "Depth [m]", title = "day " * day_string, xlims=xlims1);
 
         # exact = target2[:,i]
         exact = 𝒟.y[i]
-        p2 = scatter(model_output[i], 𝒟.zavg);
-        plot!(exact, 𝒟.zavg, legend = false, xlabel = "$(long_name[variable])", ylabel = "Depth [m]", title = "Direct model output", xlims=xlims2);
+        p2 = scatter(model_output[i], 𝒟.zavg, label = "Model output");
+        plot!(exact, 𝒟.zavg, label = "Target", xlabel = "$(long_name[variable])", ylabel = "Depth [m]", title = "Direct model output", xlims=xlims2);
 
         plot(p1, p2, layout=(@layout [a b]), size=(1000,500))
     end

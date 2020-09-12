@@ -206,7 +206,7 @@ function plot_error_histogram(𝒢::GP, 𝒟::ProfileData, time_index)
 
     gpr_error = zeros(n-1)
     for i in 1:n-1
-        exact    = 𝒟.y[i+1]
+        exact    = 𝒟.vavg[i+1]
         predi    = gpr_prediction[i+1]
         gpr_error[i] = euclidean_distance(exact, predi) # euclidean distance
     end

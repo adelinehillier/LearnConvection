@@ -15,14 +15,14 @@ filename = togglebuttons(OrderedDict("general_strat_16" =>"general_strat_16_prof
                                      label="LES")
 
 kpp_params   = KPP.Parameters( ) # KPP.Parameters( CSL = 1.0, CNL = 1.0, Cb_T = 1.0, CKE = 1.0 )
-# tke_params   = TKEMassFlux.Parameters( )
+tke_params   = TKEMassFlux.TKEParameters( )
 
 # which variable to explore / which problem to solve
 problem = togglebuttons(OrderedDict("Sequential(T)" => Sequential("T"),
                             "Sequential(wT)" => Sequential("wT"),
                             "Sequential(dT)" => Sequential("dT"),
-                             "Residual(KPP)" => Residual("KPP", kpp_params)),
-                             # "Residual(TKE)" => Residual("TKE")),
+                             "Residual(KPP)" => Residual("KPP", kpp_params),
+                             "Residual(TKE)" => Residual("TKE", tke_params)),
                             label="Problem")
 
 # problem = togglebuttons(Dict("Sequential(T)" =>"Temperature [°C]",
@@ -71,7 +71,7 @@ predictions(𝒢, 𝒟) = predict(𝒢, 𝒟; postprocessed="both")
 function plot_profile_and_output(𝒢, 𝒟, time_index, gp_predictions)
     p1 = plot_profile(𝒢, 𝒟, time_index, gp_predictions[2])
     p2 = plot_model_output(𝒢, 𝒟, time_index, gp_predictions[1])
-    return plot(p1, p2, layout=(@layout [a b]), size=(900,400))
+    return plot(p1, p2, layout=(@layout [a b]), size=(850,400))
 end
 
 #updating variables
