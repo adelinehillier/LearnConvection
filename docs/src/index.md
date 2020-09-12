@@ -179,6 +179,6 @@ Where the plot on the left shows the mean GP prediction (blue dots) on the test 
 
 Run `examples/gpr/interact.jl` for an interactive exploration of GPR that uses [Interact.jl](https://github.com/JuliaGizmos/Interact.jl) and [Blink.jl](https://github.com/JuliaGizmos/Blink.jl).
 
-![Interact example 1](../../examples/gpr/demo/figures/interact_1.gif)
+![Interact example 1](../../examples/gpr/demo/figures/interact_1.png)
 
-![Interact example 2](../../examples/gpr/demo/figures/interact_2.gif)
+![Interact example 2](../../examples/gpr/demo/figures/interact_2.png)
