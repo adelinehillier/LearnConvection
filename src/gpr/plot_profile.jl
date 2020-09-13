@@ -53,7 +53,7 @@ function plot_model_output(𝒢, 𝒟, time_index, model_outputs)
 
     day_string = string(floor(Int, 𝒟.t[time_index]/86400))
     variable = 𝒟.problem.variable # "T" or "wT"
-    xlims = (minimum(minimum(𝒟.y))-0.005,maximum(maximum(𝒟.y))+0.02)
+    xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.005)
 
     exact = 𝒟.y[time_index]
 
@@ -69,8 +69,8 @@ function animate_profile_and_model_output(𝒢, 𝒟)
 
     variable = 𝒟.problem.variable # "T" or "wT"
     xlims1 = x_lims[variable]
-    xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.02)
-    # xlims2 = (minimum(minimum(𝒟.y)), maximum(maximum(𝒟.y)))
+    # xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.02)
+    xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.005)
 
     model_output, predi = predict(𝒢, 𝒟; postprocessed="both")
 

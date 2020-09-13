@@ -7,8 +7,11 @@ abstract type Problem end
 abstract type SequentialProblem <: Problem end
 abstract type ResidualProblem <: Problem end
 
-struct Sequential <: SequentialProblem # for mappings that predict the subsequent timestep from the current timestep
+mutable struct Sequential <: SequentialProblem # for mappings that predict the subsequent timestep from the current timestep
     type::String # "T" or "dT" or "wT"
+    parameters # Parameters(...) (see OceanTurb documentation)
+    Sequential(type) = new(type) # incomplete initialization
+    Sequential(type, parameters) = new(type, parameters)
 end
 
 struct Residual <: ResidualProblem # for mappings that predict the true current timestep using a physics-based model's prediction for that timestep
@@ -37,18 +40,18 @@ end
 
 mutable struct Sequential_KPP <: ResidualProblem
     variable::String
-    physics_data::Array
-    evolve_physics_model_fn::Function
+    physics_data
+    evolve_physics_model_fn # Function
     scaling::Scaling
-    Residual_KPP(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
+    Sequential_KPP(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
 end
 
 mutable struct Sequential_TKE <: ResidualProblem
     variable::String
-    physics_data::Array
-    evolve_physics_model_fn::Function
+    physics_data
+    evolve_physics_model_fn # Function
     scaling::Scaling
-    Residual_TKE(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
+    Sequential_TKE(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
 end
 
 mutable struct Residual_KPP <: ResidualProblem
@@ -95,23 +98,40 @@ function get_problem_v(problem, les, N², D)
             # Use the LES profile at time index i to predict time index i+1 using KPP
             f = closure_free_convection_kpp(D, Δt, les)
             evolve_physics_model_fn(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
-            kpp_data = zeros(length(les.t))
-            kpp_data[1] = les.T[:,1]
+            kpp_data = Array{Array{Float64,1},1}(UndefInitializer(), length(les.t))
+            kpp_data[1] = custom_avg(les.T[:,1], D)
             for i in 1:length(les.t)-1
+
+                # if i==100
+                #     println(custom_avg(les.T[:,i],D))
+                #     println(evolve_physics_model_fn(les.T[:,i]))
+                # end
+
                 kpp_data[i+1] = evolve_physics_model_fn(les.T[:,i])
             end
+            # println(kpp_data)
+            ##
+            # f3 = closure_free_convection_kpp_full_evolution(D, Δt, les)
+            # kpp_data = f3(problem.parameters)
+            # kpp_data = [kpp_data[:,i] for i in 1:length(les.t)]
+            ##
             return les.T, Sequential_KPP("T", kpp_data, evolve_physics_model_fn)
 
         elseif problem.type == "TKE"
             # Use the LES profile at time index i to predict time index i+1 using TKE
             f = closure_free_convection_tke(D, Δt, les)
-            evolve_physics_model_fn(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
-            tke_data = zeros(length(les.t))
-            tke_data[1] = les.T[:,1]
+            evolve_physics_model_fn2(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
+            tke_data = Array{Array{Float64,1},1}(UndefInitializer(), length(les.t))
+            tke_data[1] = custom_avg(les.T[:,1], D)
             for i in 1:length(les.t)-1
-                tke_data[i+1] = evolve_physics_model_fn(les.T[:,i])
+                tke_data[i+1] = evolve_physics_model_fn2(les.T[:,i])
             end
-            return les.T, Sequential_TKE("T", tke_data, evolve_physics_model_fn)
+            ##
+            # f3 = closure_free_convection_tke_full_evolution(D, Δt, les)
+            # kpp_data = f3(problem.parameters)
+            # kpp_data = [kpp_data[:,i] for i in 1:length(les.t)]
+            ##
+            return les.T, Sequential_TKE("T", tke_data, evolve_physics_model_fn2)
 
         else; throw(error())
         end

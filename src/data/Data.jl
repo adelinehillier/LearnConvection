@@ -33,6 +33,8 @@ export  Problem,
         Residual,
         SequentialProblem,
         ResidualProblem,
+        Sequential_KPP,
+        Sequential_TKE,
         get_problem_v
 
 include("residual.jl")

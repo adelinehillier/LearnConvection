@@ -21,6 +21,8 @@ tke_params   = TKEMassFlux.TKEParameters( )
 problem = togglebuttons(OrderedDict("Sequential(T)" => Sequential("T"),
                             "Sequential(wT)" => Sequential("wT"),
                             "Sequential(dT)" => Sequential("dT"),
+                           "Sequential(KPP)" => Sequential("KPP", kpp_params),
+                           "Sequential(TKE)" => Sequential("TKE", tke_params),
                              "Residual(KPP)" => Residual("KPP", kpp_params),
                              "Residual(TKE)" => Residual("TKE", tke_params)),
                             label="Problem")

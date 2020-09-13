@@ -76,7 +76,7 @@ end
 function closure_free_convection_kpp(D, Δt, les::OceananigansData;
                                      subsample = 1, grid = 1)
     # define the closure
-    function evolve_forward(parameters, T⁰; n_steps = 1)
+    function evolve_forward(parameters; T⁰=T⁰, n_steps = 1)
         # # set parameters
         # parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
         # Build the model with a Backward Euler timestepper
@@ -101,18 +101,18 @@ function closure_free_convection_kpp(D, Δt, les::OceananigansData;
             time_index = 1:length(les.t)
         end
         Nt = length(les.t[time_index])
-        𝒢 = zeros(D, Nt)
+        𝒢 = zeros(D, n_steps+1)
 
         # loop the model
         ti = collect(time_index)
-        for i in 1:n_steps
+        for i in 1:n_steps+1
             t = les.t[ti[i]]
             run_until!(model, Δt, t)
             @. 𝒢[:,i] = model.solution.T[1:D]
         end
         return 𝒢
     end
-    return free_convection
+    return evolve_forward
 end
 
 """
@@ -154,7 +154,7 @@ function closure_free_convection_flexible(D, Δt, les::OceananigansData;
             @. grid  = zp
         end
         # get average of initial condition of LES
-        T⁰ = avg(les.T⁰, N)
+        T⁰ = custom_avg(les.T⁰, N)
         # set equal to initial condition of parameterization
         model.solution.T[1:N] = copy(T⁰)
         # Set boundary conditions

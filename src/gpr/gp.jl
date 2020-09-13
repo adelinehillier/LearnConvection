@@ -200,7 +200,31 @@ Returns an n-length array of D-length vectors, where n is the number of training
 """
 function predict(𝒢::GP, 𝒟::ProfileData; postprocessed=true)
 
-    if typeof(𝒟.problem) <: SequentialProblem
+    if typeof(𝒟.problem) <: Union{Sequential_KPP, Sequential_TKE}
+        # Predict temperature profile from start to finish without the training data.
+
+        gpr_prediction=Array{Array{Float64,1},1}()
+        postprocessed_prediction=Array{Array{Float64,1},1}()
+        i=1
+        for (problem, n_x) in 𝒟.all_problems # n_x: number of predictors (i.e. time steps) for that problem
+
+            post_pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
+            gpr__pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
+            post_pred_chunk[1] = unscale(𝒟.x[i], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
+            gpr__pred_chunk[1] = 𝒟.y[i] # residual -- should be zeros for this initial time step. Good sanity check.
+
+            for i in 1:n_x-1
+                kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
+                gpr__pred_chunk[i+1] = model_output(kpp_pred, 𝒢)
+                post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
+            end
+
+            gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
+            postprocessed_prediction = vcat(postprocessed_prediction, post_pred_chunk)
+            i += n_x
+        end
+
+    elseif typeof(𝒟.problem) <: SequentialProblem
         # Predict temperature profile from start to finish without the training data.
         gpr_prediction = similar(𝒟.y)
         gpr_prediction[1] = 𝒟.y[1] # starting profile
@@ -211,30 +235,6 @@ function predict(𝒢::GP, 𝒟::ProfileData; postprocessed=true)
         end
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
 
-    elseif typeof(𝒟.problem) <: Union{Sequential_KPP, Sequential_TKE}
-        # Predict temperature profile from start to finish without the training data.
-
-        gpr_prediction=Array{Array{Float64,1},1}()
-        postprocessed_prediction=Array{Array{Float64,1},1}()
-        i=1
-        for (problem, n_x) in all_problems # n_x: number of predictors (i.e. time steps) for that problem
-
-            post_pred_chunk = similar(𝒟.y[i : i+n_x-1])
-            gpr__pred_chunk = similar(post_pred_chunk)
-            post_pred_chunk[1] = 𝒟.v[i] # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
-            gpr__pred_chunk[1] = 𝒟.y[i] # residual -- should be zeros for this initial time step. Good sanity check.
-
-            for i in 1:n_x-1
-                kpp_pred = scale(problem.evolve_physics_model_fn(unscale(post_pred_chunk[i], problem.scaling)), problem.scaling)
-                gpr__pred_chunk[i+1] = model_output(kpp_pred, 𝒢)
-                post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
-            end
-
-            gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
-            postprocessed_prediction = vcat(postprocessed_prediction, post_pred_chunk)
-            i += n_x
-        end
-
     elseif typeof(𝒟.problem) <: ResidualProblem
         # Predict temperature profile at each timestep using model-predicted difference between truth and physics-based model (KPP or TKE) prediction
         gpr_prediction = [model_output(predictors[i], 𝒢) for i in 1:(𝒟.Nt)]
@@ -244,7 +244,7 @@ function predict(𝒢::GP, 𝒟::ProfileData; postprocessed=true)
     end
 
     if postprocessed == "both";
-        return (gpr_prediction, postprocessed_prediction
+        return (gpr_prediction, postprocessed_prediction)
     end
 
     if postprocessed
