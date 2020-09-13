@@ -30,7 +30,7 @@ closure_free_convection(N, Δt, les::OceananigansData; subsample = 1, grid = 1)
     𝑪[3]: Diffusivity Amplitude \n
     𝑪[4]: Shear Constant \n
 """
-function closure_free_convection_kpp(D, Δt, les::OceananigansData;
+function closure_free_convection_kpp_full_evolution(D, Δt, les::OceananigansData;
                                      subsample = 1, grid = 1)
     # define the closure
     function free_convection(parameters)
@@ -72,6 +72,48 @@ function closure_free_convection_kpp(D, Δt, les::OceananigansData;
     return free_convection
 end
 
+
+function closure_free_convection_kpp(D, Δt, les::OceananigansData;
+                                     subsample = 1, grid = 1)
+    # define the closure
+    function evolve_forward(parameters, T⁰; n_steps = 1)
+        # # set parameters
+        # parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
+        # Build the model with a Backward Euler timestepper
+        constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
+        model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
+        # Get grid if necessary
+        if grid != 1
+            zp = collect(model.grid.zc)
+            @. grid  = zp
+        end
+        # average the initial condition
+        T⁰ = custom_avg(T⁰, D)
+        # set equal to initial condition of parameterization
+        model.solution.T[1:D] = copy(T⁰)
+        # Set boundary conditions
+        model.bcs.T.top = FluxBoundaryCondition(les.top_T)
+        model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
+        # set aside memory
+        if subsample != 1
+            time_index = subsample
+        else
+            time_index = 1:length(les.t)
+        end
+        Nt = length(les.t[time_index])
+        𝒢 = zeros(D, Nt)
+
+        # loop the model
+        ti = collect(time_index)
+        for i in 1:n_steps
+            t = les.t[ti[i]]
+            run_until!(model, Δt, t)
+            @. 𝒢[:,i] = model.solution.T[1:D]
+        end
+        return 𝒢
+    end
+    return free_convection
+end
 
 """
 closure_free_convection_flexible(N, Δt, les::OceananigansData; subsample = 1, grid = 1)

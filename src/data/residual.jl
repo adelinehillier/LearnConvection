@@ -26,18 +26,6 @@ Data pre- / post-processing for residual problems. Takes a ProfileData object an
 # |   predicted T[i] = model(TKE(T[i])) + TKE(T[i])  |
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 
-# *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
-# | Residual_KPP                                     |
-# |                                                  |
-# |   predictor            target                    |
-# |   TKE(T[i]) --model--> T[i] - TKE(T[i])          |
-# |                                                  |
-# |   model output                                   |
-# |   model(TKE(T[i]))                               |
-# |                                                  |
-# |   predicted T[i] = model(TKE(T[i])) + TKE(T[i])  |
-# *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
-
 """
 get_predictors_targets(vavg::Array, problem::Residual_KPP)
 # Description

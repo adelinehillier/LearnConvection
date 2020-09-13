@@ -42,10 +42,12 @@ export  get_predictors_targets,
 
 # running OceanTurb KPP simulations based on OceananigansData conditions
 include("../kpp/run.jl")
-export closure_free_convection_kpp
+export closure_free_convection_kpp_full_evolution,
+       closure_free_convection_kpp
 # running OceanTurb TKE simulations based on OceananigansData conditions
 include("../tke/run.jl")
-export closure_free_convection_tke
+export closure_free_convection_tke_full_evolution,
+       closure_free_convection_tke
 
 # ProfileData struct
 export  ProfileData,
@@ -135,7 +137,7 @@ function data(filename::String, problem::Problem; D=16, N=4)
     N² = approx_initial_buoyancy_stratification(les.T[:,1],z)
 
     # get problem (sets how the data will be pre- and post-processed) and v (variable array, Nz x Nt)
-    v, problem = get_problem_v(problem, les, N², D, t)
+    v, problem = get_problem_v(problem, les, N², D)
 
     # compress variable array to D gridpoints to get an Nt-length array of D-length vectors
     vavg = [custom_avg(v[:,j], D) for j in 1:Nt]
