@@ -49,20 +49,25 @@ The problem specifies which mapping we are interested in, and therefore how the 
 | Problem | Predictor  |       | Target     |
 | :---    | ---:       | :---: | :--- |
 | `Sequential("T")`    | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``T[i] `` |
-| `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``\frac{T[i]-T[i-1]}{\Delta{t'}}`` |
+| `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``\frac{T[i]-T[i-1]}{\Delta{t'}}`` [^1]|
 | `Sequential("wT")`   | ``wT[i-1]`` | ``\xrightarrow{\text{model}} `` | ``wT[i] `` |
-| `Sequential("KPP",Θ)`  | ``T[i-1]`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{KPP}(i;T[i-1])}{\Delta{t}}``   |  
-| `Sequential("TKE",Θ)`  | ``T[i-1]`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{TKE}(i;T[i-1])}{\Delta{t}}``   |
-| `Residual("KPP",Θ)`  | ``\text{KPP}(i;T[i-1])`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{KPP}(i;T[i-1])}{\Delta{t}}``   |  
-| `Residual("TKE",Θ)`  | `` \text{TKE}(i;T[i-1]) `` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{TKE}(i;T[i-1])}{\Delta{t}} `` |
+| `Sequential("KPP",Θ)`  | ``T[i-1]`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{KPP}(i;T[i-1])}{\Delta{t}}``   [^2] |  
+| `Sequential("TKE",Θ)`  | ``T[i-1]`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{TKE}(i;T[i-1])}{\Delta{t}}``   [^2] |
+| `Residual("KPP",Θ)`  | ``\text{KPP}(i;T[i-1])`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{KPP}(i;T[i-1])}{\Delta{t}}`` [^2] |  
+| `Residual("TKE",Θ)`  | `` \text{TKE}(i;T[i-1]) `` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{TKE}(i;T[i-1])}{\Delta{t}} `` [^2] |
 | `Slack("KPP",Θ)` | ``\text{KPP}(i;T[0])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(i;T[0]) `` |  
 | `Slack("TKE",Θ)` | `` \text{TKE}(i;T[0]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(i;T[0]) `` |  
 
-Where T[i] is a D-length vector of values from the horizontally-averaged temperature profile at time index i, ``\Delta{t}`` is the time interval between steps, ``N^2`` is the initial buoyancy stratification, ``\Delta{t'}`` is a rescaled time interval equal to ``\Delta{t} / N^2``, and Θ refers to the parameters for the KPP or TKE simulations (e.g. `KPP.Parameters()` or `TKEMassFlux.TKEParameters()` to use the default parameter values defined in [OceanTurb.jl](https://github.com/glwagner/OceanTurb.jl)).
+Where T[i] is a D-length vector of values from the horizontally-averaged temperature profile at time index i, ``\Delta{t}`` is the time interval between steps, and Θ refers to the parameters for the KPP or TKE simulations (e.g. `KPP.Parameters()` or `TKEMassFlux.TKEParameters()` to use the default parameter values defined in [OceanTurb.jl](https://github.com/glwagner/OceanTurb.jl)).
 
 ``KPP(i;T[0])`` and ``TKE(i;T[0])`` are the KPP and TKE model predictions, respectively, for ``T[i]`` given initial condition ``T[0]``, and ``KPP(i;T[i-1])`` and ``TKE(i;T[i-1])`` are the KPP and TKE model predictions, respectively, for ``T[i]`` given initial condition ``T[i-1]``.
 
 **Note that all temperature profiles are normalized using min-max scaling during pre-processing and un-normalized during post-processing.** This scaling is computed based on the profile at the initial timestep.
+
+[^1]:
+    ``\Delta{t'}`` is a rescaled time interval equal to ``\Delta{t} / N^2``, where ``N^2`` is the initial buoyancy stratification.
+[^2]:
+    The ``T[i-1]`` given to the KPP or TKE model as an initial condition at each time index (i.e. the ``T[i-1]`` in ``KPP(i;T[i-1])`` and ``TKE(i;T[i-1])``) is the LES prediction for ``T[i-1]`` during training, but the previous time step’s “corrected” prediction (`Prediction` in the second table) during testing.
 
 We take the model output and predict the profile from it as follows.
 

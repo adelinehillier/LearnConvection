@@ -73,12 +73,8 @@ function postprocess_prediction(predictor, prediction, problem::Union{Residual_K
     #unscale predictor
     predictor = [unscale(vec, problem.scaling) for vec in predictor] # kpp data
 
-    # predictor = problem.kpp_data
-
     #unscale prediction
     prediction = [(vec * problem.scaling.Δv) for vec in prediction] # residual
 
     return predictor .+ prediction
-
-    # return [unscale(a .+ b, problem.scaling) for a in predictor, b in prediction]
 end
