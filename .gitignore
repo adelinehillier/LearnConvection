@@ -7,3 +7,4 @@
 /.github/workflows/TagBot.yml
 /plots/animations/
 /plots/hyperparameter_landscapes/
+./*.gif

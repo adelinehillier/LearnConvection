@@ -49,12 +49,14 @@ The problem specifies which mapping we are interested in, and therefore how the 
 | Problem | Predictor  |       | Target     |
 | :---    | ---:       | :---: | :--- |
 | `Sequential("T")`    | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``T[i] `` |
-| `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``(T[i]-T[i-1])/ \Delta{t'}`` |
+| `Sequential("dT")`   | ``T[i-1]``  | ``\xrightarrow{\text{model}} `` | ``\frac{T[i]-T[i-1]}{\Delta{t'}}`` |
 | `Sequential("wT")`   | ``wT[i-1]`` | ``\xrightarrow{\text{model}} `` | ``wT[i] `` |
-| `Sequential("KPP",Θ)`  | ``\text{KPP}(i;T[i-1])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(i;T[i-1]) ``   |  
-| `Sequential("TKE",Θ)`  | `` \text{TKE}(i;T[i-1]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(i;T[i-1]) `` |  
-| `Residual("KPP",Θ)` | ``\text{KPP}(i;T[0])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(i;T[0]) `` |  
-| `Residual("TKE",Θ)` | `` \text{TKE}(i;T[0]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(i;T[0]) `` |  
+| `Sequential("KPP",Θ)`  | ``T[i-1]`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{KPP}(i;T[i-1])}{\Delta{t}}``   |  
+| `Sequential("TKE",Θ)`  | ``T[i-1]`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{TKE}(i;T[i-1])}{\Delta{t}}``   |
+| `Residual("KPP",Θ)`  | ``\text{KPP}(i;T[i-1])`` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{KPP}(i;T[i-1])}{\Delta{t}}``   |  
+| `Residual("TKE",Θ)`  | `` \text{TKE}(i;T[i-1]) `` | ``\xrightarrow{\text{model}}`` | ``\frac{T[i] - \text{TKE}(i;T[i-1])}{\Delta{t}} `` |
+| `Slack("KPP",Θ)` | ``\text{KPP}(i;T[0])`` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{KPP}(i;T[0]) `` |  
+| `Slack("TKE",Θ)` | `` \text{TKE}(i;T[0]) `` | ``\xrightarrow{\text{model}}`` | ``T[i] - \text{TKE}(i;T[0]) `` |  
 
 Where T[i] is a D-length vector of values from the horizontally-averaged temperature profile at time index i, ``\Delta{t}`` is the time interval between steps, ``N^2`` is the initial buoyancy stratification, ``\Delta{t'}`` is a rescaled time interval equal to ``\Delta{t} / N^2``, and Θ refers to the parameters for the KPP or TKE simulations (e.g. `KPP.Parameters()` or `TKEMassFlux.TKEParameters()` to use the default parameter values defined in [OceanTurb.jl](https://github.com/glwagner/OceanTurb.jl)).
 
@@ -66,13 +68,15 @@ We take the model output and predict the profile from it as follows.
 
 | Problem | Prediction   |
 | :---    | :---         |
-| `Sequential("T")`      | ``f(T[i-1]) = model(T[i-1])``  |
-| `Sequential("dT")`     | ``f(T[i-1]) = model(T[i-1])\Delta{t} + T[i-1]``  |
-| `Sequential("wT")`     | ``f(wT[i-1]) = model(wT[i-1])`` |
-| `Sequential("KPP",Θ)`   | ``f(KPP(i;T[i-1])) = {model}(KPP(i;T[i-1])) + KPP(i;T[i-1])`` |  
-| `Sequential("TKE",Θ)`  | ``f(TKE(i;T[i-1])) = {model}(TKE(i;T[i-1])) + TKE(i;T[i-1])`` |
-| `Residual("KPP",Θ)`    | ``f(KPP(i;T[0])) = {model}(KPP(i;T[0])) + KPP(i;T[0])`` |  
-| `Residual("TKE",Θ)`    | ``f(TKE(i;T[0])) = {model}(TKE(i;T[0])) + TKE(i;T[0])`` |
+| `Sequential("T")`      | ``f(\mathbf{x}) = model(\mathbf{x})``  |
+| `Sequential("dT")`     | ``f(\mathbf{x}) = model(\mathbf{x})\Delta{t'} + T[i-1]``  |
+| `Sequential("wT")`     | ``f(\mathbf{x}) = model(\mathbf{x})`` |
+| `Sequential("KPP",Θ)`  | ``f(\mathbf{x}) = {model}(\mathbf{x})\Delta{t} + KPP(i;T[i-1])`` |  
+| `Sequential("TKE",Θ)`  | ``f(\mathbf{x}) = {model}(\mathbf{x})\Delta{t} + TKE(i;T[i-1])`` |
+| `Residual("KPP",Θ)`    | ``f(\mathbf{x}) = {model}(\mathbf{x})\Delta{t} + KPP(i;T[i-1])`` |  
+| `Residual("TKE",Θ)`    | ``f(\mathbf{x}) = {model}(\mathbf{x})\Delta{t} + TKE(i;T[i-1])`` |
+| `Slack("KPP",Θ)`       | ``f(\mathbf{x}) = {model}(\mathbf{x}) + KPP(i;T[0])`` |  
+| `Slack("TKE",Θ)`       | ``f(\mathbf{x}) = {model}(\mathbf{x}) + TKE(i;T[0])`` |
 
 Where ``model(\mathbf{x})`` is the direct model output on predictor ``\mathbf{x}``, which we hope will be close to the target.
 
@@ -92,7 +96,7 @@ ME_{greedy} = \frac{1}{n_t}\ \sum_{i \in X}\lVert {model} (\mathbf{x}_\mathbf{i}
 
 The meaning of the prediction depends on the type of problem.
 
-If the problem is a `Sequential` problem, the mean error is computed as follows.
+If the problem is a `Sequential` or `Residual` problem, the mean error is computed as follows.
 
 ```math
 ME_{true} = \frac{1}{n_t}\ \sum_{i=1}^{n_t-1} \lVert \hat{\mathbf{y_i}} - \mathbf{y_i} \rVert
@@ -108,7 +112,7 @@ ME_{true} = \frac{1}{n_t}\ \sum_{i=1}^{n_t-1} \lVert \hat{\mathbf{y_i}} - \mathb
 
 Each timestep's profile is predicted based on the previous model's timestep, with the initial condition at time index i=0 being the initial condition of the true simulation. The error thus evaluates how accurately the model evolves the profile forward from the initial profile ``\mathbf{x_0}``--which is the only information the model is supplied with during testing.
 
-If the problem is a `Residual` problem, the mean error is computed as follows.
+If the problem is a `Slack` problem, the mean error is computed as follows.
 
 ```math
 ME_{true} = \frac{1}{n_t}\ \sum_{i=0}^{n_t-1} \lVert {f} (\mathbf{x_i}) - \mathbf{y_i} \rVert

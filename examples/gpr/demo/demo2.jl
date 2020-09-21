@@ -11,12 +11,7 @@ train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
 validate = ["general_strat_12_profiles.jld2", "general_strat_24_profiles.jld2"]
 test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2", "general_strat_20_profiles.jld2", "general_strat_28_profiles.jld2"]
 
-train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
-validate = ["general_strat_16_profiles.jld2", "general_strat_4_profiles.jld2"]
-test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2"]
-
-
-for problem in [Sequential("T"), Sequential("dT"), Residual("KPP", KPP.Parameters()), Residual("TKE", TKEMassFlux.TKEParameters()) ]
+for problem in [Sequential("T"), Sequential("dT"), Sequential("KPP", KPP.Parameters()), Sequential("TKE", TKEMassFlux.TKEParameters()), Residual("KPP", KPP.Parameters()), Residual("TKE", TKEMassFlux.TKEParameters()) ]
 
     println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
 

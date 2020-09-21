@@ -237,8 +237,10 @@ function predict(𝒢::GP, 𝒟::ProfileData; postprocessed=true)
 
     elseif typeof(𝒟.problem) <: ResidualProblem
         # Predict temperature profile at each timestep using model-predicted difference between truth and physics-based model (KPP or TKE) prediction
-        gpr_prediction = [model_output(predictors[i], 𝒢) for i in 1:(𝒟.Nt)]
+        gpr_prediction = [model_output(𝒟.x[i], 𝒢) for i in 1:(𝒟.Nt)]
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
+        ##
+        # animate_physics_profile(𝒢, 𝒟)
 
     else; throw(error)
     end
@@ -265,3 +267,34 @@ function get_postprocessed_predictions(x, gpr_prediction, all_problems)
 
     return result
 end
+
+
+# function animate_physics_profile(𝒢, 𝒟)
+#
+#     variable = 𝒟.problem.variable # "T" or "wT"
+#     xlims = x_lims[variable]
+#
+#     physics_data=Array{Array{Float64,1},1}()
+#     for (problem, n_x) in 𝒟.all_problems # n_x: number of predictors for that problem
+#         physics_data = vcat(physics_data, problem.physics_data)
+#     end
+#
+#     # Compute error
+#     n = length(physics_data)
+#     total_error = 0.0
+#     for i in 1:n
+#         total_error += euclidean_distance(𝒟.vavg[i], physics_data[i])
+#     end
+#     println("ERROR $(total_error / n)")
+#     println(total_error / n)
+#
+#     # Animate
+#     animation_set = 1:30:(length(physics_data)-2)
+#     anim = @animate for i in animation_set
+#         day_string = string(floor(Int, 𝒟.t[i]/86400))
+#         scatter(physics_data[i], 𝒟.zavg, label = "Physics") ####
+#         plot!(𝒟.v[:,i], 𝒟.z, legend = :topleft, label = "LES", xlabel = "$(long_name[variable])", ylabel = "Depth [m]", title = "day " * day_string, xlims=xlims)
+#     end
+#
+#     gif(anim, "physics_plot.gif")
+# end
