@@ -1,3 +1,5 @@
+using Plots
+
 long_name = Dict("T" =>"Temperature [°C]", "wT"=>"Temperature flux [°C⋅m/s]")
 x_lims = Dict("T" =>(18,20), "wT"=>(-1e-5,4e-5))
 
@@ -9,13 +11,13 @@ Plots the simulation profile at a single given index in the data timeseries alon
 corresponding GP prediction (prediciting on the training data). i.e. produces a snapshot of the profile evolution.
 The gpr_prediction is computed outside this function for efficiency.
 ----- Arguments
-- `𝒢` (GP). The GP object
+- `ℳ` (GP or NN). The model.
 - `𝒟` (ProfileData). The ProfileData object used for training and testing.
-- `V_name` (ProfileData). The ProfileData object whose starting profile will be evolved forward using 𝒢.
+- `V_name` (ProfileData). The ProfileData object whose starting profile will be evolved forward using ℳ.
 - `time_index` (Int). The time index
-- `gpr_prediction` (Array). Output of get_gpr_pred (which should only be computed once) on 𝒢 and 𝒟.
+- `gpr_prediction` (Array). Output of get_gpr_pred (which should only be computed once) on ℳ and 𝒟.
 """
-function plot_profile(𝒢::GP, 𝒟::ProfileData, time_index, gpr_prediction)
+function plot_profile(ℳ, 𝒟::ProfileData, time_index, gpr_prediction)
 
     day_string = string(floor(Int, 𝒟.t[time_index]/86400))
     variable = 𝒟.problem.variable # "T" or "wT"
@@ -28,12 +30,12 @@ function plot_profile(𝒢::GP, 𝒟::ProfileData, time_index, gpr_prediction)
     return p
 end
 
-function animate_profile(𝒢, 𝒟)
+function animate_profile(ℳ, 𝒟)
 
     variable = 𝒟.problem.variable # "T" or "wT"
     xlims = x_lims[variable]
 
-    predi = predict(𝒢, 𝒟; postprocessed=true)
+    predi = predict(ℳ, 𝒟; postprocessed=true)
 
     animation_set = 1:30:(𝒟.Nt-2)
     anim = @animate for i in animation_set
@@ -49,7 +51,7 @@ end
 
 # Instead of plotting the full profile computed from the model output, returns the model output directly instead.
 # For example, if the problem is a residual problem, plots the residual predicted by the model, not the profile computed from the residual.
-function plot_model_output(𝒢, 𝒟, time_index, model_outputs)
+function plot_model_output(ℳ, 𝒟, time_index, model_outputs)
 
     day_string = string(floor(Int, 𝒟.t[time_index]/86400))
     variable = 𝒟.problem.variable # "T" or "wT"
@@ -65,14 +67,14 @@ end
 # v = 𝒟.v
 # v = [v[:,i] for i in size(v)[2]]
 # _ , exact_y = get_predictors_targets(v, 𝒟.problem) # what the model output should be exactly.
-function animate_profile_and_model_output(𝒢, 𝒟)
+function animate_profile_and_model_output(ℳ, 𝒟)
 
     variable = 𝒟.problem.variable # "T" or "wT"
     xlims1 = x_lims[variable]
     # xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.02)
     xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.005)
 
-    model_output, predi = predict(𝒢, 𝒟; postprocessed="both")
+    model_output, predi = predict(ℳ, 𝒟; postprocessed="both")
 
     ###
     # f = closure_free_convection_kpp(length(𝒟.z), 𝒟.t[2]-𝒟.t[1], get_les_data("general_strat_32_profiles.jld2")) # full resolution KPP prediction

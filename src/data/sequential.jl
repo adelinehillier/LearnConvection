@@ -221,11 +221,11 @@ function get_predictors_targets(vavg::Array, problem::Union{Sequential_KPP, Sequ
     # store the scaling as an attribute in the problem for later use
     problem.scaling = scaling
 
-    # scale kpp data with same scaling
-    predictors = [scale(vec, scaling) for vec in problem.physics_data] # kpp(T[i])
+    # scale physics data with same scaling
+    physics_data = [scale(vec, scaling) for vec in problem.physics_data] # kpp(i; T[i-1])
 
-    targets = vavg .- predictors # residual
-    return (predictors, targets)
+    targets = vavg .- physics_data # residual
+    return (vavg, targets)
 end
 
 """

@@ -31,14 +31,19 @@ include("problems.jl")
 export  Problem,
         Sequential,
         Residual,
+        Slack,
         SequentialProblem,
         ResidualProblem,
-        Sequential_KPP,
-        Sequential_TKE,
-        get_problem_v
+        SlackProblem,
+        get_problem_v,
+        predict # important!
 
-include("residual.jl")
+export Sequential_KPP,
+       Sequential_TKE
+
 include("sequential.jl")
+include("residual.jl")
+include("slack.jl")
 export  get_predictors_targets,
         postprocess_prediction
 

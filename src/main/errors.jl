@@ -1,11 +1,11 @@
 # include("gp.jl")
 # include("distances.jl")
 
-function get_me_true_check(𝒢::GP, 𝒟::ProfileData)
+function get_me_true_check(ℳ, 𝒟::ProfileData)
     # mean error on true check for a single value of γ
 
     total_error = 0.0
-    gpr_prediction = predict(𝒢, 𝒟; postprocessed=true)
+    gpr_prediction = predict(ℳ, 𝒟; postprocessed=true)
     # println("Nt-1$(𝒟.Nt-1)")
     # println("pred$(length(gpr_prediction))")
     # println("vavg$(length(𝒟.vavg))")
@@ -21,7 +21,7 @@ function get_me_true_check(𝒢::GP, 𝒟::ProfileData)
     return total_error / n
 end
 
-function get_me_greedy_check(𝒢::GP, 𝒟::ProfileData)
+function get_me_greedy_check(ℳ, 𝒟::ProfileData)
     # mean error on greedy check
     # compares the direct model output to the target for all of the timesteps in the validation set.
 
@@ -30,7 +30,7 @@ function get_me_greedy_check(𝒢::GP, 𝒟::ProfileData)
     n = length(validation_set)
     for j in 1:n
         test_index = validation_set[j]
-        y_prediction = model_output(𝒟.x[test_index], 𝒢)
+        y_prediction = model_output(𝒟.x[test_index], ℳ)
         error = euclidean_distance(y_prediction, 𝒟.y[test_index])
         total_error += error
     end

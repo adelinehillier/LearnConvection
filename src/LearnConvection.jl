@@ -11,13 +11,12 @@ export
         ProfileData,
         Sequential,
         Residual,
+        Slack,
 
         # GaussianProcess / gp.jl
         # construct_gpr,
         uncertainty,
-
         # model,
-        predict,
 
         # GaussianProcess / kernels.jl
         Kernel,
@@ -37,11 +36,14 @@ export
         get_min_gamma_alpha,
         train_validate_test,
 
-        # GaussianProcess / plot_profile
+        # Main / plot_profile.jl
         plot_profile,
         plot_model_output,
         animate_profile,
-        animate_profile_and_model_output
+        animate_profile_and_model_output,
+
+        # Main / predict.jl
+        predict
 
         # kernel options
         #  1   =>   "Squared exponential"         => "Squared exponential kernel:        k(x,x') = σ * exp( - ||x-x'||² / 2γ² )",
@@ -65,9 +67,11 @@ export KPP, TKEMassFlux
 # submodules
 include("data/Data.jl")
 include("gpr/GaussianProcess.jl")
+include("main/Main.jl")
 
 # re-export symbols from submodules
 using .Data
 using .GaussianProcess
+using .Main
 
 end

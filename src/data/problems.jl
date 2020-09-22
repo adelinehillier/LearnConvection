@@ -15,7 +15,14 @@ mutable struct Sequential <: SequentialProblem # for mappings that predict the s
     Sequential(type, parameters) = new(type, parameters)
 end
 
-struct Residual <: ResidualProblem # for mappings that predict the true current timestep using a physics-based model's prediction for that timestep
+mutable struct Residual <: ResidualProblem # for mappings that predict the subsequent timestep from the current timestep
+    type::String # "KPP" or "TKE"
+    parameters # Parameters(...) (see OceanTurb documentation)
+    Residual(type) = new(type) # incomplete initialization
+    Residual(type, parameters) = new(type, parameters)
+end
+
+struct Slack <: SlackProblem # for mappings that predict the true current timestep using a physics-based model's prediction for that timestep
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
 end

@@ -25,12 +25,8 @@ export  model_output,
         uncertainty,
         compute_kernel_matrix,
         mean_log_marginal_loss
-export  model,
-        predict
-
-include("errors.jl")
-export  get_me_true_check, # evolving forward from an arbitrary initial timestep
-        get_me_greedy_check # how well does the mean GP prediction fit the training data?
+export  model
+        # predict
 
 # plot hyperparameter landscapes for analysis / optimization
 include("hyperparameter_landscapes.jl")
@@ -40,12 +36,6 @@ export  plot_landscapes_compare_error_metrics,
         get_min_gamma,
         get_min_gamma_alpha,
         train_validate_test
-
-include("plot_profile.jl")
-export  plot_profile,
-        plot_model_output,
-        animate_profile,
-        animate_profile_and_model_output
 
 export get_kernel
 
@@ -83,6 +73,5 @@ function get_kernel(kernel_id::Int64, logγ, logσ, distance; logα=0.0)
         if kernel_id==5; return RationalQuadraticI(γ, σ, α, distance)
         else; throw(error()) end
 end
-
 
 end

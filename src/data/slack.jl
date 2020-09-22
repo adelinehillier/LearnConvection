@@ -1,9 +1,9 @@
 """
-Data pre- / post-processing for residual problems. Takes a ProfileData object and prepares it for use in GP.
+Data pre- / post-processing for Slack problems. Takes a ProfileData object and prepares it for use in GP.
 """
 
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
-# | Residual_KPP                                     |
+# | Slack_KPP                                     |
 # |                                                  |
 # |   predictor            target                    |
 # |   KPP(T[i]) --model--> T[i] - KPP(T[i])          |
@@ -15,7 +15,7 @@ Data pre- / post-processing for residual problems. Takes a ProfileData object an
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
-# | Residual_TKE                                     |
+# | Slack_TKE                                     |
 # |                                                  |
 # |   predictor            target                    |
 # |   TKE(T[i]) --model--> T[i] - TKE(T[i])          |
@@ -27,7 +27,7 @@ Data pre- / post-processing for residual problems. Takes a ProfileData object an
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 
 """
-get_predictors_targets(vavg::Array, problem::Residual_KPP)
+get_predictors_targets(vavg::Array, problem::Slack_KPP)
 # Description
     Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
     Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
@@ -37,9 +37,9 @@ get_predictors_targets(vavg::Array, problem::Residual_KPP)
 
 # Arguments
 - `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
--  `problem`: (Residual_KPP)    Residual_KPP object associated with the data (output of get_problem)
+-  `problem`: (Slack_KPP)    Slack_KPP object associated with the data (output of get_problem)
 """
-function get_predictors_targets(vavg::Array, problem::Union{Residual_KPP, Residual_TKE})
+function get_predictors_targets(vavg::Array, problem::Union{Slack_KPP, Slack_TKE})
 
     # scale according to initial temperature profile vavg[1]
     scaling = min_max_scaling(vavg[1][end]-vavg[1][1], minimum(vavg[1]))
@@ -49,7 +49,7 @@ function get_predictors_targets(vavg::Array, problem::Union{Residual_KPP, Residu
     problem.scaling = scaling
 
     # scale kpp data with same scaling
-    predictors = [scale(vec, scaling) for vec in problem.physics_data] # kpp(i; T[i-1]) or # tke(i; T[i-1])
+    predictors = [scale(vec, scaling) for vec in problem.physics_data] # kpp(T[i])
 
     targets = vavg .- predictors # residual
     return (predictors, targets)
@@ -57,7 +57,7 @@ end
 
 """
 # Description
-Takes in a predictor, T[i], the GP prediction on the predictor, G(T[i]), and a Residual_KPP object.
+Takes in a predictor, T[i], the GP prediction on the predictor, G(T[i]), and a Slack_KPP object.
 Returns the predicted temperature profile, T[i+1], computed from T[i] and G(T[i]) by
 
            prediction = model(predictor) # residual
@@ -66,15 +66,19 @@ Returns the predicted temperature profile, T[i+1], computed from T[i] and G(T[i]
 # Arguments
 - `predictor`: (Array)            T[i], the predictor for a temperature profile
 - `prediction`: (Array)           model(T[i), the prediction for a temperature profile
-- `problem`: (Residual_KPP)
+- `problem`: (Slack_KPP)
 """
-function postprocess_prediction(predictor, prediction, problem::Union{Residual_KPP, Residual_TKE})
+function postprocess_prediction(predictor, prediction, problem::Union{Slack_KPP, Slack_TKE})
 
     #unscale predictor
     predictor = [unscale(vec, problem.scaling) for vec in predictor] # kpp data
+
+    # predictor = problem.kpp_data
 
     #unscale prediction
     prediction = [(vec * problem.scaling.Δv) for vec in prediction] # residual
 
     return predictor .+ prediction
+
+    # return [unscale(a .+ b, problem.scaling) for a in predictor, b in prediction]
 end
