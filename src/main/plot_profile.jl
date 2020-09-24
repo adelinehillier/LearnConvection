@@ -5,12 +5,12 @@ x_lims = Dict("T" =>(18,20), "wT"=>(-1e-5,4e-5))
 
 """
 plot_profile(gp::GP, data::ProfileData, V_name, time_index, gpr_prediction)
------ Description
+# Description
 Used in interact.jl
 Plots the simulation profile at a single given index in the data timeseries along with the
 corresponding GP prediction (prediciting on the training data). i.e. produces a snapshot of the profile evolution.
 The gpr_prediction is computed outside this function for efficiency.
------ Arguments
+# Arguments
 - `ℳ` (GP or NN). The model.
 - `𝒟` (ProfileData). The ProfileData object used for training and testing.
 - `V_name` (ProfileData). The ProfileData object whose starting profile will be evolved forward using ℳ.
@@ -96,7 +96,7 @@ function animate_profile_and_model_output(ℳ, 𝒟)
         # exact = target2[:,i]
         exact = 𝒟.y[i]
         p2 = scatter(model_output[i], 𝒟.zavg, label = "Model output");
-        plot!(exact, 𝒟.zavg, label = "Target", xlabel = "$(long_name[variable])", ylabel = "Depth [m]", title = "Direct model output", xlims=xlims2);
+        plot!(exact, 𝒟.zavg, label = "Target", ylabel = "Depth [m]", title = "Direct model output", xlims=xlims2);
 
         plot(p1, p2, layout=(@layout [a b]), size=(1000,500))
     end

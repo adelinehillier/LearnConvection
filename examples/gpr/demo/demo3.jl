@@ -26,7 +26,7 @@ test = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 # problem  = Residual("TKE", TKEMassFlux.TKEParameters())
 # problem  = Sequential("TKE", TKEMassFlux.TKEParameters())
 # problem  = Sequential("KPP", KPP.Parameters())
-problem  = Residual("KPP", KPP.Parameters())
+problem  = Sequential("KPP", KPP.Parameters())
 
 k = 2
 logγ = -0.4

@@ -122,7 +122,8 @@ end
 # %         log(m(:))
 # %         log(sqrt(v(:))) ]
 
-# https://github.com/alshedivat/gpml/blob/master/cov/covSM.m
+"""
+https://github.com/alshedivat/gpml/blob/master/cov/covSM.m
 
 # % For more details, see
 # % [1] SM: Gaussian Process Kernels for Pattern Discovery and Extrapolation,
@@ -135,7 +136,7 @@ end
 # %     http://www.cs.cmu.edu/~andrewgw/andrewgwthesis.pdf
 # % [4] http://www.cs.cmu.edu/~andrewgw/pattern/.
 
-
+"""
 # function covSMfast(Q,hyp,x,z)
 #     smp = Q<0
 #     Q = abs(Q)
@@ -154,9 +155,9 @@ end
 #     end
 #     K = reshape(K.*ones(size(T,1),1),n,[]);
 #     else
-#     E = exp(-0.5*(T.*T)*v); H = E.*cos(T*m);
-#     K = reshape(H*w',n,[]);
-#     return K
+         # E = exp(-0.5*(T.*T)*v); H = E.*cos(T*m);
+         # K = reshape(H*w',n,[]);
+         # return K
 #   end
 # end
 #

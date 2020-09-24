@@ -224,7 +224,7 @@ function get_predictors_targets(vavg::Array, problem::Union{Sequential_KPP, Sequ
     # scale physics data with same scaling
     physics_data = [scale(vec, scaling) for vec in problem.physics_data] # kpp(i; T[i-1])
 
-    targets = vavg .- physics_data # residual
+    targets = (vavg .- physics_data) / problem.Δt # residual
     return (vavg, targets)
 end
 
@@ -249,5 +249,5 @@ function postprocess_prediction(predictor, prediction, problem::Union{Sequential
     #unscale prediction
     prediction = [(vec * problem.scaling.Δv) for vec in prediction] # residual
 
-    return predictor .+ prediction
+    return predictor .+ prediction * problem.Δt
 end

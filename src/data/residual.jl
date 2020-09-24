@@ -51,7 +51,7 @@ function get_predictors_targets(vavg::Array, problem::Union{Residual_KPP, Residu
     # scale kpp data with same scaling
     predictors = [scale(vec, scaling) for vec in problem.physics_data] # kpp(i; T[i-1]) or # tke(i; T[i-1])
 
-    targets = vavg .- predictors # residual
+    targets = (vavg .- predictors) / problem.Δt # residual
     return (predictors, targets)
 end
 
@@ -76,5 +76,5 @@ function postprocess_prediction(predictor, prediction, problem::Union{Residual_K
     #unscale prediction
     prediction = [(vec * problem.scaling.Δv) for vec in prediction] # residual
 
-    return predictor .+ prediction
+    return predictor .+ prediction * problem.Δt
 end

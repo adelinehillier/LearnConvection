@@ -50,32 +50,36 @@ mutable struct Sequential_KPP <: SequentialProblem
     variable::String
     physics_data
     evolve_physics_model_fn # Function
+    Δt # assumes constant time interval between all timesteps
     scaling::Scaling
-    Sequential_KPP(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
+    Sequential_KPP(variable, physics_data, evolve_physics_model_fn, Δt) = new(variable, physics_data, evolve_physics_model_fn, Δt) # incomplete initialization
 end
 
 mutable struct Sequential_TKE <: SequentialProblem
     variable::String
     physics_data
     evolve_physics_model_fn # Function
+    Δt # assumes constant time interval between all timesteps
     scaling::Scaling
-    Sequential_TKE(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
+    Sequential_TKE(variable, physics_data, evolve_physics_model_fn, Δt) = new(variable, physics_data, evolve_physics_model_fn, Δt) # incomplete initialization
 end
 
 mutable struct Residual_KPP <: ResidualProblem
     variable::String
     physics_data
     evolve_physics_model_fn # Function
+    Δt # assumes constant time interval between all timesteps
     scaling::Scaling
-    Residual_KPP(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
+    Residual_KPP(variable, physics_data, evolve_physics_model_fn, Δt) = new(variable, physics_data, evolve_physics_model_fn, Δt) # incomplete initialization
 end
 
 mutable struct Residual_TKE <: ResidualProblem
     variable::String
     physics_data
     evolve_physics_model_fn # Function
+    Δt # assumes constant time interval between all timesteps
     scaling::Scaling
-    Residual_TKE(variable, physics_data, evolve_physics_model_fn) = new(variable, physics_data, evolve_physics_model_fn) # incomplete initialization
+    Residual_TKE(variable, physics_data, evolve_physics_model_fn, Δt) = new(variable, physics_data, evolve_physics_model_fn, Δt) # incomplete initialization
 end
 
 mutable struct Slack_KPP <: SlackProblem
@@ -138,7 +142,7 @@ function get_problem_v(problem, les, N², D)
             # kpp_data = f3(problem.parameters)
             # kpp_data = [kpp_data[:,i] for i in 1:length(les.t)]
             ##
-            return les.T, Sequential_KPP("T", kpp_data, evolve_physics_model_fn)
+            return les.T, Sequential_KPP("T", kpp_data, evolve_physics_model_fn, Δt)
 
         elseif problem.type == "TKE"
             # Use the LES profile at time index i to predict time index i+1 using TKE
@@ -154,15 +158,15 @@ function get_problem_v(problem, les, N², D)
             # kpp_data = f3(problem.parameters)
             # kpp_data = [kpp_data[:,i] for i in 1:length(les.t)]
             ##
-            return les.T, Sequential_TKE("T", tke_data, evolve_physics_model_fn2)
+            return les.T, Sequential_TKE("T", tke_data, evolve_physics_model_fn2, Δt)
 
         else; throw(error())
         end
 
 
-    if typeof(problem) <: ResidualProblem
+    elseif typeof(problem) <: ResidualProblem
 
-        elseif problem.type == "KPP"
+        if problem.type == "KPP"
             # Use the LES profile at time index i to predict time index i+1 using KPP
             f = closure_free_convection_kpp(D, Δt, les)
             evolve_physics_model_fn3(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
@@ -183,7 +187,7 @@ function get_problem_v(problem, les, N², D)
             # kpp_data = f3(problem.parameters)
             # kpp_data = [kpp_data[:,i] for i in 1:length(les.t)]
             ##
-            return les.T, Residual_KPP("T", kpp_data, evolve_physics_model_fn)
+            return les.T, Residual_KPP("T", kpp_data, evolve_physics_model_fn3, Δt)
 
         elseif problem.type == "TKE"
             # Use the LES profile at time index i to predict time index i+1 using TKE
@@ -199,7 +203,7 @@ function get_problem_v(problem, les, N², D)
             # kpp_data = f3(problem.parameters)
             # kpp_data = [kpp_data[:,i] for i in 1:length(les.t)]
             ##
-            return les.T, Residual_TKE("T", tke_data, evolve_physics_model_fn2)
+            return les.T, Residual_TKE("T", tke_data, evolve_physics_model_fn4, Δt)
 
         else; throw(error())
         end
