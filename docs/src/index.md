@@ -143,12 +143,12 @@ The kernel (or covariance) function sets the form of the interpolation function.
 | 3         | Matérn with ʋ=3/2       | γ, σ | ``k(x,x') = \sigma (1+c) e^{-\sqrt{3} d(x,x'))/\gamma}`` |
 | 4         | Matérn with ʋ=5/2       | γ, σ | ``k(x,x') = \sigma ( 1 + \frac{\sqrt{5}d(x,x')}{\gamma} + \frac{5{d(x,x')}^2}{3\gamma^2} ) e^{-√(5) \frac{d(x,x')}{\gamma}}`` |
 | 5         | Rational quadratic      | γ, σ, α | ``k(x,x') = \sigma (1+(x-x')'(x-x')/(2*\alpha (\gamma^2))^{-\alpha}`` |
-| 6         | Spectral mixture product | \mu, \sigma, w | ``\prod_{p=1}^{P} \sum_{a=1}^{A} w_{p,a}^2 \text{exp} ({-2\pi^2\tau_p^2 \sigma_{p,a}^2}) \cos{(2\pi\tau_p\mu_{p,a})}``, ``\tau = x-x'`` [^3]|
+| 6         | Spectral mixture product | ``\mu, \sigma, w`` | ``\prod_{p=1}^{P} \sum_{a=1}^{A} w_{p,a}^2 \text{exp} ({-2\pi^2\tau_p^2 \sigma_{p,a}^2}) \cos{(2\pi\tau_p\mu_{p,a})}``, ``\tau = x-x'`` [^3]|
 
 Where γ is a length-scale parameter, σ is a signal variance parameter, α is an additional parameter used only in the rational quadratic kernel, and ``d`` is the distance metric used in the kernel function. The options for ``d`` are `euclidean_distance`, `derivative_distance`, and `antiderivative_distance`.
 
 [^3]:
-    SMP: GPatt: Fast Multidimensional Pattern Extrapolation with GPs, arXiv 1310.5288, 2013, by Andrew Gordon Wilson, Elad Gilboa, Arye Nehorai and John P. Cunningham. Implemented in MATLAB ![here])https://github.com/alshedivat/gpml/blob/master/cov/covSM.m).
+    SMP: GPatt: Fast Multidimensional Pattern Extrapolation with GPs, arXiv 1310.5288, 2013, by Andrew Gordon Wilson, Elad Gilboa, Arye Nehorai and John P. Cunningham. Implemented in MATLAB ![here](https://github.com/alshedivat/gpml/blob/master/cov/covSM.m).
 
 ### Basic Example
 

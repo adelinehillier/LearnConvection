@@ -36,6 +36,10 @@ export
         get_min_gamma_alpha,
         train_validate_test,
 
+        # Main / errors.jl
+        get_me_true_check,
+        get_me_greedy_check,
+
         # Main / plot_profile.jl
         plot_profile,
         plot_model_output,
