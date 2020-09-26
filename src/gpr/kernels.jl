@@ -116,27 +116,48 @@ function kernel_function(k::Matern52I; z=nothing)
 end
 
 
-# % The hyperparameters are:
-# %
-# % hyp = [ log(w(:))
-# %         log(m(:))
-# %         log(sqrt(v(:))) ]
+# """
+# https://github.com/alshedivat/gpml/blob/master/cov/covSM.m
+#
+# hyp = [ log(w(:))
+#          log(m(:))
+#          log(sqrt(v(:))) ]
+#
+# Q: number of components
+# D: dimension of the input
+#
+# """
 
-"""
-https://github.com/alshedivat/gpml/blob/master/cov/covSM.m
+# struct SMP
+#     # Hyperparameters
+#     hyp
+# end
+#
+# function SMP(Q,hyp,a,b)
+#       D = length(a);
+#       n = 1                                        # dimensionality
+#       w = reshape(  hyp(         1:D*Q) ,D,Q);     # mixture weights
+#       m = reshape(  hyp(D*Q+    (1:D*Q)),D,Q);     # spectral means
+#       v = reshape(2*hyp(D*Q+D*Q+(1:D*Q)),D,Q);     # spectral variances
+#
+#       T = 2*pi*bsxfun(@minus,reshape(a,n,1,D),reshape(b,1,[],D));
+#
+#       T = reshape(T,[],D);
+#
+#       K = 1;
+#       w = reshape(w,Q,D)';
+#       m = reshape(m,Q,D)';
+#       v = reshape(v,Q,D)';
+#
+#       h(t2v, tm) = exp(-0.5*t2v).*cos(tm);
+#       for d=1:D
+#           K = K .* ( h( (T(:,d).*T(:,d))*v(d,:), T(:,d)*m(d,:) )*w(d,:)' );
+#       end
+#       K = reshape(K.*ones(size(T,1),1),n,[]);
+#
+#       return K
+# end
 
-# % For more details, see
-# % [1] SM: Gaussian Process Kernels for Pattern Discovery and Extrapolation,
-# %     ICML, 2013, by Andrew Gordon Wilson and Ryan Prescott Adams,
-# % [2] SMP: GPatt: Fast Multidimensional Pattern Extrapolation with GPs,
-# %     arXiv 1310.5288, 2013, by Andrew Gordon Wilson, Elad Gilboa,
-# %     Arye Nehorai and John P. Cunningham, and
-# % [3] Covariance kernels for fast automatic pattern discovery and extrapolation
-# %     with Gaussian processes, Andrew Gordon Wilson, PhD Thesis, January 2014.
-# %     http://www.cs.cmu.edu/~andrewgw/andrewgwthesis.pdf
-# % [4] http://www.cs.cmu.edu/~andrewgw/pattern/.
-
-"""
 # function covSMfast(Q,hyp,x,z)
 #     smp = Q<0
 #     Q = abs(Q)
@@ -182,25 +203,3 @@ https://github.com/alshedivat/gpml/blob/master/cov/covSM.m
 # end
 #
 #
-# function SMP(Q,hyp,x,z)
-#   Q = abs(Q)
-#   n,D = size(x);                                    # dimensionality
-#   w = exp(reshape(  hyp(         1:D*Q) ,D,Q));     # mixture weights
-#   m = exp(reshape(  hyp(D*Q+    (1:D*Q)),D,Q));     # spectral means
-#   v = exp(reshape(2*hyp(D*Q+D*Q+(1:D*Q)),D,Q));     # spectral variances
-#
-#   T = reshape(T,[],D);
-#
-#   K = 1;
-#   w = reshape(w,Q,D)';
-#   m = reshape(m,Q,D)';
-#   v = reshape(v,Q,D)';
-#
-#   h(t2v, tm) = exp(-0.5*t2v).*cos(tm);
-#   for d=1:D
-#       K = K .* ( h( (T(:,d).*T(:,d))*v(d,:), T(:,d)*m(d,:) )*w(d,:)' );
-#   end
-#   K = reshape(K.*ones(size(T,1),1),n,[]);
-#
-#   return K
-# end

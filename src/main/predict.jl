@@ -71,7 +71,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
         gpr_prediction[1] = 𝒟.y[1] # starting profile
 
         for i in 1:(length(𝒟.y)-1)
-            y_prediction = ℳ_output(gpr_prediction[i], ℳ)
+            y_prediction = model_output(gpr_prediction[i], ℳ)
             gpr_prediction[i+1] = y_prediction
         end
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)

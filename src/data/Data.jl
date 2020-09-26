@@ -1,10 +1,6 @@
 """
 Data module for preparing data for analysis with
-
     - GaussianProcess (src/gpr/GaussianProcess.jl)
-        or
-    - NeuralNetwork (src/gpr/NeuralNetwork.jl)
-
 """
 
 module Data
@@ -129,10 +125,6 @@ function data(filename::String, problem::Problem; D=16, N=4)
     # collect data from Oceananigans simulation output file
     les = get_les_data(filename) # <: OceananigansData
 
-    # timeseries [s]
-    t = les.t
-    Nt = length(t)
-
     # eddy diffusivity
     κₑ = les.κₑ
 
@@ -143,8 +135,16 @@ function data(filename::String, problem::Problem; D=16, N=4)
     # approximate buoyancy stratification at the initial timestep
     N² = approx_initial_buoyancy_stratification(les.T[:,1],z)
 
-    # get problem (sets how the data will be pre- and post-processed) and v (variable array, Nz x Nt)
-    v, problem = get_problem_v(problem, les, N², D)
+    # get v (variable array, Nz x Nt) and cut out the first 2 hours
+    s = Int(120 / (les.t[2] - les.t[1])):length(les.t)
+    v = get_v(problem)[s]
+
+    # timeseries [s]
+    t = les.t[s]
+    Nt = length(t)
+
+    # get problem (sets how the data will be pre- and post-processed)
+    problem = get_problem(problem, les, v, N², D)
 
     # compress variable array to D gridpoints to get an Nt-length array of D-length vectors
     vavg = [custom_avg(v[:,j], D) for j in 1:Nt]
