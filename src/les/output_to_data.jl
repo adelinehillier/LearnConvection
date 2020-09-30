@@ -131,11 +131,12 @@ function ReadJLD2_OceananigansData(filename)
     t = zeros(Nt)
 
     #Second Order Statistics
-    wT = zeros(Nz, Nt)
-    wS = zeros(Nz, Nt)
-    uu = zeros(Nz, Nt)
-    vv = zeros(Nz, Nt)
-    ww = zeros(Nz, Nt)
+    wT  = zeros(Nz, Nt)
+    wS  = zeros(Nz, Nt)
+    uu  = zeros(Nz, Nt)
+    vv  = zeros(Nz, Nt)
+    ww  = zeros(Nz, Nt)
+    tke = 0.5*(uu.^2 .+ vv.^2 .+ ww.^2)
 
     # grab arrays
     for j in 1:Nt
@@ -165,7 +166,7 @@ function ReadJLD2_OceananigansData(filename)
     # Push fields into container
     push!(container, T, S, U, V)
     # Push second order statistics into container
-    push!(container, wT, wS, uu, vv, ww)
+    push!(container, wT, wS, uu, vv, ww, tke)
 
     # Now grab parameter
     ρ = les_data["parameters"]["density"]

@@ -8,22 +8,28 @@ abstract type SequentialProblem <: Problem end
 abstract type ResidualProblem <: Problem end
 abstract type SlackProblem <: Problem end
 
-mutable struct Sequential <: SequentialProblem
-    type::String # "T" or "dT" or "wT"
-    parameters # Parameters(...) (see OceanTurb documentation)
-    Sequential(type) = new(type) # incomplete initialization
-    Sequential(type, parameters) = new(type, parameters)
-end
+default_modify_predictors_fn(x, 𝒟, time_index) = x
 
-mutable struct Residual <: ResidualProblem
+struct Sequential <: SequentialProblem
+    type::String # "T" or "dT" or "wT" or "KPP" or "TKE"
+    parameters # Parameters(...) (see OceanTurb documentation)
+    modify_predictors_fn
+end
+Sequential(type; parameters=nothing, modify_predictors_fn=default_modify_predictors_fn) = Sequential(type, params, modify_predictors_fn)
+
+struct Residual <: ResidualProblem
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
+    modify_predictors_fn
 end
+Residual(type; parameters=nothing, modify_predictors_fn=default_modify_predictors_fn) = Residual(type, params, modify_predictors_fn)
 
 struct Slack <: SlackProblem
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
+    modify_predictors_fn
 end
+Slack(type; parameters=nothing, modify_predictors_fn=default_modify_predictors_fn) = Slack(type, params, modify_predictors_fn)
 
 mutable struct Sequential_dT <: SequentialProblem
     variable::String #"T" or "wT"
@@ -101,7 +107,7 @@ get_v(problem)
 # Arguments
 - 'problem': (Problem).     what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"))
 """
-function get_v(problem)
+function get_v(problem, les)
     if problem.type == "wT"
         return les.wT
     elseif problem.type in ["T", "dT", "KPP", "TKE"]

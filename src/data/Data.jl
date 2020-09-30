@@ -9,6 +9,7 @@ using OceanTurb
 using OrderedCollections
 
 include("../les/custom_avg.jl")
+export custom_avg
 
 # harvesting Oceananigans data
 include("../les/get_les_data.jl")
@@ -80,8 +81,7 @@ ProfileData
     zavg::Array,        length-D vector; depth values averaged to D gridpoints
     t::Array,           timeseries [seconds]
     Nt::Int64,          length(timeseries)
-    n_train::Int64,     number of training pairs
-    κₑ::Float,          eddy diffusivity
+    tke_avg ::Array{Array{Float64,1},1}
     processor::DataProcessor, struct for preparing the data for GP regression
     problem::Problem,   what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"), Residual("T"), Residual("KPP"), or Residual("TKE"))
 
@@ -98,10 +98,10 @@ struct ProfileData
     zavg    ::Vector{Float64}
     t       ::Vector{Float64}
     Nt      ::Int64
-    # n_train ::Int64
-    # κₑ      ::Float64
+    tke_avg ::Array{Array{Float64,1},1}
     problem ::Problem
     all_problems::Array{Array{Any,1},1}
+    modify_predictors_fn::Function
 end
 
 """
@@ -136,12 +136,19 @@ function data(filename::String, problem::Problem; D=16, N=4)
     N² = approx_initial_buoyancy_stratification(les.T[:,1],z)
 
     # get v (variable array, Nz x Nt) and cut out the first 2 hours
-    s = Int(120 / (les.t[2] - les.t[1])):length(les.t)
-    v = get_v(problem)[s]
+    start = floor(Int64, 7200 / (les.t[2] - les.t[1]))+1
+    s = start:length(les.t)
+    v = get_v(problem, les)[s]
+
+    # turbulent kinetic energy
+    tke_avg = [custom_avg(les.tke[:,j], D) for j in s]
 
     # timeseries [s]
     t = les.t[s]
     Nt = length(t)
+
+    # modify_predictors_fn
+    modify_predictors_fn = problem.modify_predictors_fn
 
     # get problem (sets how the data will be pre- and post-processed)
     problem = get_problem(problem, les, v, N², D)
@@ -165,7 +172,7 @@ function data(filename::String, problem::Problem; D=16, N=4)
     # (preprocessing is already taken care of before the data is merged)
     all_problems = [[problem, length(x)]]
 
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, problem, all_problems)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, tke_avg, problem, all_problems, modify_predictors_fn)
 end
 
 """
@@ -198,6 +205,7 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
     y = 𝒟.y
     x_train = 𝒟.x_train
     y_train = 𝒟.y_train
+    tke_avg = 𝒟.tke_avg
     validation_set = 𝒟.validation_set
     all_problems = 𝒟.all_problems
 
@@ -214,13 +222,14 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
         validation_set = vcat(validation_set, 𝒟2.validation_set)
         x_train = vcat(x_train, 𝒟2.x_train)
         y_train = vcat(y_train, 𝒟2.y_train)
+        tke_avg = vcat(tke_avg, 𝒟2.tke_avg)
         append!(all_problems, 𝒟2.all_problems)
         t = vcat(t, 𝒟2.t)
         Nt += 𝒟2.Nt
     end
 
     # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, tke_avg, 𝒟.problem, all_problems, modify_predictors_fn)
 end
 
 end # module

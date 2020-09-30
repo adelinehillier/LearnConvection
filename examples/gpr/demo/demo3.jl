@@ -31,10 +31,24 @@ problem  = Sequential("T")
 # problem  = Sequential("TKE", TKEMassFlux.TKEParameters())
 # problem  = Sequential("KPP", KPP.Parameters())
 
-# k = 2
-# logγ = -0.4
-# distance = antiderivative_distance
-# kernel   = get_kernel(k, logγ, 0.0, distance)
+model_output(i, )
+
+Sequential(type; parameters=nothing, modify_predictors_fn=nothing)
+
+Sequential("T"; modify_predictors_fn=append_tke)
+
+function modify_predictors_fn(x, 𝒟, time_index)
+    vcat(x, 𝒟.tke)
+end
+
+
+
+
+
+k = 2
+logγ = -0.4
+distance = antiderivative_distance
+kernel   = get_kernel(k, logγ, 0.0, distance)
 
 𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
 𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);

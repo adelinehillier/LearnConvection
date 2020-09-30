@@ -16,4 +16,6 @@ export  plot_profile,
 include("predict.jl")
 export predict
 
+model_output(x, time_index, ℳ, 𝒟) = model_output(𝒟.modify_predictors_fn(x, 𝒟, time_index), ℳ)
+
 end

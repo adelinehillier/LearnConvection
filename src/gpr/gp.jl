@@ -47,7 +47,7 @@ Constructs the posterior distribution for a gp. In other words this does the 'tr
 # Return
 - GP object
 """
-function model(x_train, y_train, kernel::Kernel, zavg; sparsity_threshold = 0.0, robust = true, entry_threshold = sqrt(eps(1.0)))
+function model(x_train, y_train, kernel, zavg; sparsity_threshold = 0.0, robust = true, entry_threshold = sqrt(eps(1.0)))
 
     # get k(x,x') function from kernel object
     kernel = kernel_function(kernel; z=zavg)
@@ -79,13 +79,12 @@ function model(x_train, y_train, kernel::Kernel, zavg; sparsity_threshold = 0.0,
     α = CK \ y # α = K + σ_noise*I
 
     # construct struct
-    return GP(kernel, x_train, α, K, Array(CK))
+    return GP(kernel, x_train, α', K, Array(CK))
 end
 
 function model(𝒟::ProfileData; kernel::Kernel = Kernel())
     # create instance of GP using data from ProfileData object
-    𝒢 = model(𝒟.x_train, 𝒟.y_train, kernel, 𝒟.zavg);
-    return 𝒢
+    return model(𝒟.x_train, 𝒟.y_train, kernel, 𝒟.zavg);
 end
 
 """
@@ -93,13 +92,13 @@ prediction(x, 𝒢::GP)
 # Description
 - Given state x, GP 𝒢, returns the mean GP prediction
 # Arguments
-- `x`: scaled state
+- `x`: single scaled state
 - `𝒢`: GP object with which to make the prediction
 # Return
 - `y`: scaled prediction
 """
 function model_output(x, 𝒢::GP)
-    return 𝒢.α' * 𝒢.kernel.([x], 𝒢.x_train)
+    return 𝒢.α * 𝒢.kernel.([x], 𝒢.x_train)
 end
 
 """

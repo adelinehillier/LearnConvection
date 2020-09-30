@@ -4,14 +4,14 @@ using StaticArrays
 # include("gp.jl")
 # include("errors.jl")
 
-function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-0.4:0.1:0.4)
+function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0)
     # Train GP on the filenames in train;
     # Optimize hyperparameter values by testing on filenames in validate;
     # Compute error on the filenames in test.
 
-    min_logγs       = @MArray zeros(3,5)
-    validate_errors = @MArray zeros(3,5)
-    test_errors     = @MArray zeros(3,5)
+    min_logγs       = zeros(3,5)
+    validate_errors = zeros(3,5)
+    test_errors     = zeros(3,5)
 
     distances = [euclidean_distance, derivative_distance, antiderivative_distance]
     for k in 1:4, (i, d) in enumerate(distances)
@@ -37,6 +37,13 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     println("TEST ME")
     println("$(test_errors)")
 
+    d, k    = argmin(min_logγs)
+    logγ    = min_logγs[d,k]
+    kernel  = get_kernel(k, logγ, 0.0, distances[d])
+    𝒢       = model(𝒟_train; kernel=kernel)
+    anim    = animate_profile_and_model_output(𝒢, 𝒟_test)
+    gif(anim, "$(typeof(problem))_$(problem.type)_kernel_$(k)_gamma_$(logγ).gif")
+
     return (min_logγs, validate_errors, test_errors)
 end
 
@@ -44,7 +51,7 @@ end
 
 function get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=-0.3:0.1:0.3)
 
-    errors_validate = @MVector zeros(length(log_γs))
+    errors_validate = zeros(length(log_γs))
 
     for (i, logγ) in enumerate(log_γs)
 

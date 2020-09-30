@@ -32,7 +32,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
             for i in 1:n_x-1
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
-                gpr__pred_chunk[i+1] = model_output(scale(post_pred_chunk[i], problem.scaling), ℳ)
+                gpr__pred_chunk[i+1] = model_output(scale(post_pred_chunk[i], problem.scaling), i, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
             end
 
@@ -56,7 +56,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
             for i in 1:n_x-1
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
-                gpr__pred_chunk[i+1] = model_output(kpp_pred, ℳ)
+                gpr__pred_chunk[i+1] = model_output(kpp_pred, i, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
             end
 
@@ -71,14 +71,14 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
         gpr_prediction[1] = 𝒟.y[1] # starting profile
 
         for i in 1:(length(𝒟.y)-1)
-            y_prediction = model_output(gpr_prediction[i], ℳ)
+            y_prediction = model_output(gpr_prediction[i], i, ℳ, 𝒟)
             gpr_prediction[i+1] = y_prediction
         end
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
 
     elseif typeof(𝒟.problem) <: SlackProblem
         # Predict temperature profile at each timestep using model-predicted difference between truth and physics-based model (KPP or TKE) prediction
-        gpr_prediction = [GaussianProcess.model_output(𝒟.x[i], ℳ) for i in 1:(𝒟.Nt)]
+        gpr_prediction = [GaussianProcess.model_output(𝒟.x[i], i, ℳ, 𝒟) for i in 1:(𝒟.Nt)]
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
         ##
         # animate_physics_profile(ℳ, 𝒟)
