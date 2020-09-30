@@ -37,7 +37,9 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     println("TEST Mean Error")
     println(test_errors)
 
-    d, k    = argmin(min_logγs)
+    a = argmin(min_logγs)
+    d = a[1]
+    k = a[2]
     logγ    = min_logγs[d,k]
     kernel  = get_kernel(k, logγ, 0.0, distances[d])
     ℳ      = model(𝒟_train; kernel=kernel)
