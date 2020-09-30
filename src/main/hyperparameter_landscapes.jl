@@ -4,7 +4,7 @@ using StaticArrays
 # include("gp.jl")
 # include("errors.jl")
 
-function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0)
+function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0, distances=[euclidean_distance, derivative_distance, antiderivative_distance])
     # Train GP on the filenames in train;
     # Optimize hyperparameter values by testing on filenames in validate;
     # Compute error on the filenames in test.
@@ -13,7 +13,6 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     validate_errors = zeros(3,5)
     test_errors     = zeros(3,5)
 
-    distances = [euclidean_distance, derivative_distance, antiderivative_distance]
     for k in 1:4, (i, d) in enumerate(distances)
         min_logγ, min_error_validate, test_error = get_min_gamma(k, d, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
         min_logγs[i,k]       = min_logγ

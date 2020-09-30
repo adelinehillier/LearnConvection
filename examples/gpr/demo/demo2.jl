@@ -2,24 +2,13 @@
 using LearnConvection
 using Plots
 
-## Interpolation
-
-train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
-validate = ["general_strat_12_profiles.jld2", "general_strat_24_profiles.jld2"]
-test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2", "general_strat_20_profiles.jld2", "general_strat_28_profiles.jld2"]
-
-##
-
-D=32
-N=4
-
 default_modify_predictor_fn(x, 𝒟, time_index) = x
 
 modify_pred_fns = [
     default_modify_predictor_fn,
     append_tke,
-    partial_temp_profile(1:8),
-    partial_temp_profile(9:16),
+    partial_temp_profile(1:16),
+    partial_temp_profile(17:32),
 ]
 
 f = default_modify_predictor_fn
@@ -33,6 +22,17 @@ problems = [Sequential("T"; modify_predictor_fn=f),
             Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f)
 ]
 
+## Interpolation
+
+train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
+validate = ["general_strat_12_profiles.jld2", "general_strat_24_profiles.jld2"]
+test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2", "general_strat_20_profiles.jld2", "general_strat_28_profiles.jld2"]
+
+##
+
+D=32
+N=4
+
 for problem in problems
 
     println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
@@ -41,7 +41,7 @@ for problem in problems
     𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
     𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
 
-    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0)
+    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0, distances=[euclidean_distance])
 
 end
 

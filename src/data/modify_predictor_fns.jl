@@ -5,7 +5,7 @@ function append_tke(x, time_index, state_variables)
 end
 
 function partial_temp_profile(z_set)
-    function f(x, time_index, state_variables)
+    function f(x, time_index, 𝒟)
         x[z_set]
     end
     f

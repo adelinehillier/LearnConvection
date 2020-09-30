@@ -27,8 +27,7 @@ problem  = Residual("KPP"; parameters=KPP.Parameters())
 problem  = Residual("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("KPP"; parameters=KPP.Parameters())
-
-problem = Sequential("T"; modify_predictor_fn=append_tke)
+problem = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
 
 
 k = 2
@@ -38,10 +37,10 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 
 𝒟_train  = LearnConvection.Data.data(train, problem; D=D, N=N);
 𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
-
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
 
 anim = animate_profile(𝒢, 𝒟_test)
+
 
 # anim = animate_profile_and_model_output(𝒢, 𝒟_test)
 # gif(anim, "animated_profile_and_model_output.gif")

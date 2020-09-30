@@ -157,7 +157,7 @@ function data(filename::String, problem::Problem; D=16, N=4)
     state_variables = StateVariables(array_to_avg(les.tke))
 
     # modify_predictor_fn
-    modify_predictor_fn(x, time_index) = problem.modify_predictor_fn(x, time_index, state_variables)
+    modify_predictor_fn(state, time_index) = problem.modify_predictor_fn(state, time_index, state_variables)
 
     # get problem (sets how the data will be pre- and post-processed)
     specific_problem = get_problem(problem, les, v, N², D)
@@ -237,8 +237,11 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
         Nt += 𝒟2.Nt
     end
 
+    state_variables = StateVariables(tke_avg)
+    modify_predictor_fn(state, time_index) = problem.modify_predictor_fn(state, time_index, state_variables)
+
     # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems, StateVariables(tke_avg), 𝒟.modify_predictor_fn)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems, state_variables, modify_predictor_fn)
 end
 
 end # module

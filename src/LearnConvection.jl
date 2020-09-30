@@ -77,7 +77,6 @@ include("data/Data.jl")
 include("gpr/GaussianProcess.jl")
 include("main/Main.jl")
 
-# re-export symbols from submodules
 using .Data
 using .GaussianProcess
 using .Main
