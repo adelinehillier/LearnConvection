@@ -21,37 +21,23 @@ test = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 
 ##
 
-train = ["general_strat_28_profiles.jld2"]
-test = train
-
 problem  = Sequential("T")
-# problem  = Sequential("dT")
-# problem  = Residual("KPP", KPP.Parameters())
-# problem  = Residual("TKE", TKEMassFlux.TKEParameters())
-# problem  = Sequential("TKE", TKEMassFlux.TKEParameters())
-# problem  = Sequential("KPP", KPP.Parameters())
+problem  = Sequential("dT")
+problem  = Residual("KPP"; parameters=KPP.Parameters())
+problem  = Residual("TKE"; parameters=TKEMassFlux.TKEParameters())
+problem  = Sequential("TKE"; parameters=TKEMassFlux.TKEParameters())
+problem  = Sequential("KPP"; parameters=KPP.Parameters())
 
-model_output(i, )
-
-Sequential(type; parameters=nothing, modify_predictors_fn=nothing)
-
-Sequential("T"; modify_predictors_fn=append_tke)
-
-function modify_predictors_fn(x, 𝒟, time_index)
-    vcat(x, 𝒟.tke)
-end
-
-
-
+problem = Sequential("T"; modify_predictor_fn=append_tke)
 
 
 k = 2
 logγ = -0.4
-distance = antiderivative_distance
+distance = euclidean_distance
 kernel   = get_kernel(k, logγ, 0.0, distance)
 
-𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
-𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
+𝒟_train  = LearnConvection.Data.data(train, problem; D=D, N=N);
+𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
 
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
 
@@ -94,7 +80,7 @@ D        = 32
 N        = 4
 
 # problem
-problem  = Residual("TKE", TKEMassFlux.TKEParameters())
+problem  = Residual("TKE"; parameters = TKEMassFlux.TKEParameters())
 
 # kernel
 k = 2

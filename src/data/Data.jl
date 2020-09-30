@@ -44,10 +44,15 @@ include("slack.jl")
 export  get_predictors_targets,
         postprocess_prediction
 
+include("modify_predictor_fns.jl")
+export append_tke,
+       partial_temp_profile
+
 # running OceanTurb KPP simulations based on OceananigansData conditions
 include("../kpp/run.jl")
 export closure_free_convection_kpp_full_evolution,
        closure_free_convection_kpp
+
 # running OceanTurb TKE simulations based on OceananigansData conditions
 include("../tke/run.jl")
 export closure_free_convection_tke_full_evolution,
@@ -63,6 +68,10 @@ function approx_initial_buoyancy_stratification(T_initial,z)
     g = 9.80665
     N² = (T_initial[1] - T_initial[end])*α*g / z[1] # approximate initial buoyancy gradient N², where b = N²z + 20*α*g and T = N²z/(αg) + 20
     return N²
+end
+
+struct StateVariables
+    tke_avg # turbulent kinetic energy
 end
 
 """
@@ -81,8 +90,7 @@ ProfileData
     zavg::Array,        length-D vector; depth values averaged to D gridpoints
     t::Array,           timeseries [seconds]
     Nt::Int64,          length(timeseries)
-    tke_avg ::Array{Array{Float64,1},1}
-    processor::DataProcessor, struct for preparing the data for GP regression
+    state_variables
     problem::Problem,   what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"), Residual("T"), Residual("KPP"), or Residual("TKE"))
 
 """
@@ -98,10 +106,10 @@ struct ProfileData
     zavg    ::Vector{Float64}
     t       ::Vector{Float64}
     Nt      ::Int64
-    tke_avg ::Array{Array{Float64,1},1}
     problem ::Problem
     all_problems::Array{Array{Any,1},1}
-    modify_predictors_fn::Function
+    state_variables::StateVariables
+    modify_predictor_fn::Function
 end
 
 """
@@ -132,26 +140,27 @@ function data(filename::String, problem::Problem; D=16, N=4)
     z = les.z
     zavg = custom_avg(z, D)
 
-    # approximate buoyancy stratification at the initial timestep
-    N² = approx_initial_buoyancy_stratification(les.T[:,1],z)
-
     # get v (variable array, Nz x Nt) and cut out the first 2 hours
     start = floor(Int64, 7200 / (les.t[2] - les.t[1]))+1
     s = start:length(les.t)
-    v = get_v(problem, les)[s]
-
-    # turbulent kinetic energy
-    tke_avg = [custom_avg(les.tke[:,j], D) for j in s]
+    v = get_v(problem, les)[:,s]
 
     # timeseries [s]
     t = les.t[s]
     Nt = length(t)
 
-    # modify_predictors_fn
-    modify_predictors_fn = problem.modify_predictors_fn
+    # approximate buoyancy stratification at the initial timestep
+    N² = approx_initial_buoyancy_stratification(les.T[:,1],z)
+
+    # state variables
+    array_to_avg(array) = [custom_avg(array[:,j], D) for j in s]
+    state_variables = StateVariables(array_to_avg(les.tke))
+
+    # modify_predictor_fn
+    modify_predictor_fn(x, time_index) = problem.modify_predictor_fn(x, time_index, state_variables)
 
     # get problem (sets how the data will be pre- and post-processed)
-    problem = get_problem(problem, les, v, N², D)
+    specific_problem = get_problem(problem, les, v, N², D)
 
     # compress variable array to D gridpoints to get an Nt-length array of D-length vectors
     vavg = [custom_avg(v[:,j], D) for j in 1:Nt]
@@ -163,16 +172,16 @@ function data(filename::String, problem::Problem; D=16, N=4)
     n_train = length(training_set)
 
     # get the predictors and target predictions to train the model on
-    x, y = get_predictors_targets(vavg, problem)
+    x, y = get_predictors_targets(vavg, specific_problem)
 
-    x_train = x[training_set]
+    x_train = [modify_predictor_fn(x[i], i) for i in training_set]
     y_train = y[training_set]
 
     # if the data contains multiple files, we'll need a way to postprocess the data separately for each one
     # (preprocessing is already taken care of before the data is merged)
-    all_problems = [[problem, length(x)]]
+    all_problems = [[specific_problem, length(x)]]
 
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, tke_avg, problem, all_problems, modify_predictors_fn)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, specific_problem, all_problems, state_variables, modify_predictor_fn)
 end
 
 """
@@ -205,7 +214,7 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
     y = 𝒟.y
     x_train = 𝒟.x_train
     y_train = 𝒟.y_train
-    tke_avg = 𝒟.tke_avg
+    tke_avg = 𝒟.state_variables.tke_avg
     validation_set = 𝒟.validation_set
     all_problems = 𝒟.all_problems
 
@@ -222,14 +231,14 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
         validation_set = vcat(validation_set, 𝒟2.validation_set)
         x_train = vcat(x_train, 𝒟2.x_train)
         y_train = vcat(y_train, 𝒟2.y_train)
-        tke_avg = vcat(tke_avg, 𝒟2.tke_avg)
+        tke_avg = vcat(tke_avg, 𝒟2.state_variables.tke_avg)
         append!(all_problems, 𝒟2.all_problems)
         t = vcat(t, 𝒟2.t)
         Nt += 𝒟2.Nt
     end
 
     # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, tke_avg, 𝒟.problem, all_problems, modify_predictors_fn)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems, StateVariables(tke_avg), 𝒟.modify_predictor_fn)
 end
 
 end # module

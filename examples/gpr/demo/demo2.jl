@@ -2,17 +2,42 @@
 using LearnConvection
 using Plots
 
-D=16
-N=4
-
 ## Interpolation
 
 train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
 validate = ["general_strat_12_profiles.jld2", "general_strat_24_profiles.jld2"]
 test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2", "general_strat_20_profiles.jld2", "general_strat_28_profiles.jld2"]
 
+## Extrapolation
 
-for problem in [Sequential("T"), Sequential("dT"), Sequential("KPP", KPP.Parameters()), Sequential("TKE", TKEMassFlux.TKEParameters()), Residual("KPP", KPP.Parameters()), Residual("TKE", TKEMassFlux.TKEParameters()) ]
+train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
+validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
+test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
+
+##
+
+D=32
+N=4
+
+default_modify_predictor_fn(x, 𝒟, time_index) = x
+
+modify_pred_fns = [
+    default_modify_predictor_fn,
+    append_tke,
+    partial_temp_profile(1:8),
+    partial_temp_profile(9:16),
+]
+
+problems = [Sequential("T"; modify_predictor_fn=f),
+            Sequential("T"; modify_predictor_fn=f),
+            Sequential("dT"; modify_predictor_fn=f),
+            Residual("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
+            Residual("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
+            Sequential("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
+            Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f)
+]
+
+for problem in problems
 
     println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
 
@@ -32,20 +57,3 @@ end
 # distance=euclidean_distance
 # get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=-0.4:0.1:0.4)
 # get_min_gamma_alpha(5, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=-0.4:0.1:0.4)
-
-## Extrapolation
-
-train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
-validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
-test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
-
-for problem in [Sequential("T"), Sequential("dT"), Residual("KPP", KPP.Parameters()), Residual("TKE", TKEMassFlux.TKEParameters()) ]
-
-    println("$(problem)")
-
-    𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N)
-    𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N)
-    𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N)
-
-    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-0.4:0.1:0.4)
-end

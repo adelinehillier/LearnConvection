@@ -22,23 +22,23 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
         gpr_prediction=Array{Array{Float64,1},1}()
         postprocessed_prediction=Array{Array{Float64,1},1}()
-        i=1
+        t=1 # time index
         for (problem, n_x) in 𝒟.all_problems # n_x: number of predictors (i.e. time steps) for that problem
 
             post_pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
             gpr__pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
-            post_pred_chunk[1] = unscale(𝒟.x[i], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
-            gpr__pred_chunk[1] = 𝒟.y[i] # residual -- should be zeros for this initial time step. Good sanity check.
+            post_pred_chunk[1] = unscale(𝒟.x[t], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
+            gpr__pred_chunk[1] = 𝒟.y[t] # residual -- should be zeros for this initial time step. Good sanity check.
 
             for i in 1:n_x-1
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
-                gpr__pred_chunk[i+1] = model_output(scale(post_pred_chunk[i], problem.scaling), i, ℳ, 𝒟)
+                gpr__pred_chunk[i+1] = model_output(scale(post_pred_chunk[i], problem.scaling), t, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
             end
 
             gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
             postprocessed_prediction = vcat(postprocessed_prediction, post_pred_chunk)
-            i += n_x
+            t += n_x
         end
 
     elseif typeof(𝒟.problem) <: ResidualProblem
@@ -46,23 +46,23 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
         gpr_prediction=Array{Array{Float64,1},1}()
         postprocessed_prediction=Array{Array{Float64,1},1}()
-        i=1
+        t=1 # time index
         for (problem, n_x) in 𝒟.all_problems # n_x: number of predictors (i.e. time steps) for that problem
 
             post_pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
             gpr__pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
-            post_pred_chunk[1] = unscale(𝒟.x[i], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
-            gpr__pred_chunk[1] = 𝒟.y[i] # residual -- should be zeros for this initial time step. Good sanity check.
+            post_pred_chunk[1] = unscale(𝒟.x[t], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
+            gpr__pred_chunk[1] = 𝒟.y[t] # residual -- should be zeros for this initial time step. Good sanity check.
 
             for i in 1:n_x-1
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
-                gpr__pred_chunk[i+1] = model_output(kpp_pred, i, ℳ, 𝒟)
+                gpr__pred_chunk[i+1] = model_output(kpp_pred, t, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
             end
 
             gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
             postprocessed_prediction = vcat(postprocessed_prediction, post_pred_chunk)
-            i += n_x
+            t += n_x
         end
 
     elseif typeof(𝒟.problem) <: SequentialProblem

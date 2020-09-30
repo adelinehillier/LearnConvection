@@ -25,6 +25,7 @@ struct OceananigansData{𝒮, 𝒯, 𝒰, 𝒱}
     uu::𝒯
     vv::𝒯
     ww::𝒯
+    tke::𝒯
 
     # simulation constants, 8
     ρ::𝒰
@@ -35,7 +36,6 @@ struct OceananigansData{𝒮, 𝒯, 𝒰, 𝒱}
     g::𝒰
     L::𝒰
     κₑ::𝒰
-
 
     # time and grid, 2
     t::𝒮
@@ -81,6 +81,7 @@ OceananigansData(filename)
     uu::𝒯
     vv::𝒯
     ww::𝒯
+    tke::𝒯
     # simulation constants
     ρ::𝒰
     α::𝒰

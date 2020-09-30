@@ -3,6 +3,8 @@ module Main
 using LearnConvection.Data
 using LearnConvection.GaussianProcess
 
+model_output(x, time_index, ℳ, 𝒟) = GaussianProcess.model_output(𝒟.modify_predictor_fn(x, time_index), ℳ)
+
 include("errors.jl")
 export  get_me_true_check, # evolving forward from an arbitrary initial timestep
         get_me_greedy_check # how well does the mean GP prediction fit the training data?
@@ -16,6 +18,13 @@ export  plot_profile,
 include("predict.jl")
 export predict
 
-model_output(x, time_index, ℳ, 𝒟) = model_output(𝒟.modify_predictors_fn(x, 𝒟, time_index), ℳ)
+# plot hyperparameter landscapes for analysis / optimization
+include("hyperparameter_landscapes.jl")
+export  plot_landscapes_compare_error_metrics,
+        plot_landscapes_compare_files_me,
+        plot_error_histogram,
+        get_min_gamma,
+        get_min_gamma_alpha,
+        train_validate_test
 
-end
+end #module

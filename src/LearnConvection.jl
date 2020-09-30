@@ -6,12 +6,16 @@ Uses ProfileData struct to store data and GP struct for performing GPR on the da
 module LearnConvection
 
 export
-        # ModelData / profile_data.jl
+        # Data / profile_data.jl
         data,
         ProfileData,
         Sequential,
         Residual,
         Slack,
+
+        # Data / modify_predictor_fns.jl,
+        append_tke,
+        partial_temp_profile,
 
         # GaussianProcess / gp.jl
         # construct_gpr,

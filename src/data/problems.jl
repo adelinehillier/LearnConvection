@@ -8,28 +8,28 @@ abstract type SequentialProblem <: Problem end
 abstract type ResidualProblem <: Problem end
 abstract type SlackProblem <: Problem end
 
-default_modify_predictors_fn(x, 𝒟, time_index) = x
+default_modify_predictor_fn(x, 𝒟, time_index) = x
 
 struct Sequential <: SequentialProblem
     type::String # "T" or "dT" or "wT" or "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
-    modify_predictors_fn
+    modify_predictor_fn
 end
-Sequential(type; parameters=nothing, modify_predictors_fn=default_modify_predictors_fn) = Sequential(type, params, modify_predictors_fn)
+Sequential(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn) = Sequential(type, parameters, modify_predictor_fn)
 
 struct Residual <: ResidualProblem
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
-    modify_predictors_fn
+    modify_predictor_fn
 end
-Residual(type; parameters=nothing, modify_predictors_fn=default_modify_predictors_fn) = Residual(type, params, modify_predictors_fn)
+Residual(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn) = Residual(type, parameters, modify_predictor_fn)
 
 struct Slack <: SlackProblem
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
-    modify_predictors_fn
+    modify_predictor_fn
 end
-Slack(type; parameters=nothing, modify_predictors_fn=default_modify_predictors_fn) = Slack(type, params, modify_predictors_fn)
+Slack(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn) = Slack(type, parameters, modify_predictor_fn)
 
 mutable struct Sequential_dT <: SequentialProblem
     variable::String #"T" or "wT"

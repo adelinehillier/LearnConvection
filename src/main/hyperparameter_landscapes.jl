@@ -31,18 +31,25 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     end
 
     println("MIN LOG γs")
-    println("$(min_logγs)")
-    println("VALIDATE ME")
-    println("$(validate_errors)")
-    println("TEST ME")
-    println("$(test_errors)")
+    println(min_logγs)
+    println("VALIDATE Mean Error")
+    println(validate_errors)
+    println("TEST Mean Error")
+    println(test_errors)
 
     d, k    = argmin(min_logγs)
     logγ    = min_logγs[d,k]
     kernel  = get_kernel(k, logγ, 0.0, distances[d])
-    𝒢       = model(𝒟_train; kernel=kernel)
-    anim    = animate_profile_and_model_output(𝒢, 𝒟_test)
+    ℳ      = model(𝒟_train; kernel=kernel)
+    anim    = animate_profile_and_model_output(ℳ, 𝒟_test)
     gif(anim, "$(typeof(problem))_$(problem.type)_kernel_$(k)_gamma_$(logγ).gif")
+
+    println("===============")
+    println("-- kernel ............. $(k)")
+    println("-- norm ............... $(distances[d])")
+    println("-- logγ ............... $(logγ)")
+    println("-- validate error ..... $(validate_errors[d, k])")
+    println("-- test error ......... $(test_errors[d, k])")
 
     return (min_logγs, validate_errors, test_errors)
 end
@@ -56,10 +63,10 @@ function get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γ
     for (i, logγ) in enumerate(log_γs)
 
         kernel = get_kernel(k, logγ, 0.0, distance)
-        𝒢 = model(𝒟_train; kernel=kernel)
+        ℳ = model(𝒟_train; kernel=kernel)
 
         # -----compute mean error for true check----
-        errors_validate[i] = get_me_true_check(𝒢, 𝒟_validate)
+        errors_validate[i] = get_me_true_check(ℳ, 𝒟_validate)
     end
 
     i                   = argmin(errors_validate)
@@ -69,8 +76,8 @@ function get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γ
     # using the log_γ value that minimizes the error on the validation set,
     # see how the model performs on the test set.
     kernel = get_kernel(k, min_logγ, 0.0, distance)
-    𝒢 = model(𝒟_train; kernel=kernel);
-    error_test = get_me_true_check(𝒢, 𝒟_test)
+    ℳ = model(𝒟_train; kernel=kernel);
+    error_test = get_me_true_check(ℳ, 𝒟_test)
 
     return (min_logγ, min_error_validate, error_test)
 end
@@ -83,10 +90,10 @@ end
 #     for (i, logγ) in enumerate(log_γs)
 #
 #         kernel = get_kernel(k, logγ, 0.0, distance)
-#         𝒢 = model(𝒟; kernel=kernel);
+#         ℳ = model(𝒟; kernel=kernel);
 #
 #         # -----compute mean error for true check----
-#         mets[i] = get_me_true_check(𝒢, 𝒟)
+#         mets[i] = get_me_true_check(ℳ, 𝒟)
 #     end
 #
 #     i = argmin(mets)
@@ -105,10 +112,10 @@ function get_min_gamma_alpha(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; 
     for i in eachindex(log_γs), j in eachindex(log_αs)
 
         kernel = get_kernel(k, log_γs[i], 0.0, distance; logα=log_αs[j])
-        𝒢 = model(𝒟_train; kernel=kernel);
+        ℳ = model(𝒟_train; kernel=kernel);
 
         # -----compute mean error for true check----
-        errors_validate[i,j] = get_me_true_check(𝒢, 𝒟_validate)
+        errors_validate[i,j] = get_me_true_check(ℳ, 𝒟_validate)
     end
 
     m = argmin(errors_validate)
@@ -119,8 +126,8 @@ function get_min_gamma_alpha(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; 
     # using the log_γ value that minimizes the error on the validation set,
     # see how the model performs on the test set.
     kernel = get_kernel(k, min_logγ, 0.0, distance; logα=min_logα)
-    𝒢 = model(𝒟_train; kernel=kernel);
-    error_test = get_me_true_check(𝒢, 𝒟_test)
+    ℳ = model(𝒟_train; kernel=kernel);
+    error_test = get_me_true_check(ℳ, 𝒟_test)
 
     return (min_logγ, min_error_validate, error_test)
 end
@@ -139,16 +146,16 @@ function plot_landscapes_compare_error_metrics(k::Int64, 𝒟::ProfileData, dist
     for i in 1:length(log_γs)
 
         kernel = get_kernel(k, log_γs[i], 0.0, distance)
-        𝒢 = model(𝒟; kernel=kernel)
+        ℳ = model(𝒟; kernel=kernel)
 
         # -----compute mll loss----
-        mlls[i] = -1*mean_log_marginal_loss(𝒟.y_train, 𝒢, add_constant=false)
+        mlls[i] = -1*mean_log_marginal_loss(𝒟.y_train, ℳ, add_constant=false)
 
         # -----compute mean error for greedy check (same as in plot log error)----
-        mes[i] = get_me_greedy_check(𝒢, 𝒟)
+        mes[i] = get_me_greedy_check(ℳ, 𝒟)
 
         # -----compute mean error for true check----
-        mets[i] = get_me_true_check(𝒢, 𝒟)
+        mets[i] = get_me_true_check(ℳ, 𝒟)
 
     end
 
@@ -175,8 +182,8 @@ function plot_landscapes_compare_files_me(filenames, k::Int64, distance, log_γs
         mes  = zeros(length(log_γs))
         for i in 1:length(log_γs)
             kernel = get_kernel(k, log_γs[i], 0.0, distance)
-            𝒢 = model(𝒟; kernel=kernel)
-            mes[i] = get_me_true_check(𝒢, 𝒟)
+            ℳ = model(𝒟; kernel=kernel)
+            mes[i] = get_me_true_check(ℳ, 𝒟)
         end
 
         return mes
@@ -206,9 +213,9 @@ function plot_landscapes_compare_files_me(filenames, k::Int64, distance, log_γs
     return p
 end
 
-function plot_error_histogram(𝒢::GP, 𝒟::ProfileData, time_index)
+function plot_error_histogram(ℳ, 𝒟::ProfileData, time_index)
     # mean error for true check
-    gpr_prediction = predict(𝒢, 𝒟; postprocessed=true)
+    gpr_prediction = predict(ℳ, 𝒟; postprocessed=true)
     n = 𝒟.Nt-1
 
     gpr_error = zeros(n-1)
