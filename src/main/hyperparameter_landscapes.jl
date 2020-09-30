@@ -43,7 +43,7 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     kernel  = get_kernel(k, logγ, 0.0, distances[d])
     ℳ      = model(𝒟_train; kernel=kernel)
     anim    = animate_profile_and_model_output(ℳ, 𝒟_test)
-    gif(anim, "$(typeof(problem))_$(problem.type)_kernel_$(k)_gamma_$(logγ).gif")
+    gif(anim, "$(typeof(problem))_$(problem.type)_kernel_$(k)_gamma_$(logγ).gif");
 
     println("===============")
     println("-- kernel ............. $(k)")

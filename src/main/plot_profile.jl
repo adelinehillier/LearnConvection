@@ -98,8 +98,8 @@ function animate_profile_and_model_output(ℳ, 𝒟)
         p2 = scatter(model_output[i], 𝒟.zavg, label = "Model output");
         plot!(exact, 𝒟.zavg, label = "Target", ylabel = "Depth [m]", title = "Direct model output", xlims=xlims2);
 
-        plot(p1, p2, layout=(@layout [a b]), size=(1000,500))
+        plot(p1, p2, layout=(@layout [a b]), size=(1000,500));
     end
 
-    return anim
+    anim
 end
