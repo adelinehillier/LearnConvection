@@ -160,7 +160,7 @@ function data(filename::String, problem::Problem; D=16, N=4)
     modify_predictor_fn(state, time_index) = problem.modify_predictor_fn(state, time_index, state_variables)
 
     # get problem (sets how the data will be pre- and post-processed)
-    specific_problem = get_problem(problem, les, v, N², D)
+    specific_problem = get_problem(problem, les, v, N², D, Nt)
 
     # compress variable array to D gridpoints to get an Nt-length array of D-length vectors
     vavg = [custom_avg(v[:,j], D) for j in 1:Nt]

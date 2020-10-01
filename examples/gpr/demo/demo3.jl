@@ -39,8 +39,10 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
 
-anim = animate_profile(𝒢, 𝒟_test)
+# anim = animate_profile(𝒢, 𝒟_test)
 
+anim = animate_profile_and_model_output(𝒢, 𝒟_test)
+gif(anim, "all.gif")
 
 # anim = animate_profile_and_model_output(𝒢, 𝒟_test)
 # gif(anim, "animated_profile_and_model_output.gif")
