@@ -137,7 +137,6 @@ function ReadJLD2_OceananigansData(filename)
     uu  = zeros(Nz, Nt)
     vv  = zeros(Nz, Nt)
     ww  = zeros(Nz, Nt)
-    tke = 0.5*(uu.^2 .+ vv.^2 .+ ww.^2)
 
     # grab arrays
     for j in 1:Nt
@@ -156,6 +155,9 @@ function ReadJLD2_OceananigansData(filename)
 
         t[j] = les_data["timeseries"]["t"][key]
     end
+
+    tke = 0.5*(uu.^2 .+ vv.^2 .+ ww.^2)
+
     # Set initial Conditions
     @. T⁰ = T[:,1]
     @. S⁰ = S[:,1]
