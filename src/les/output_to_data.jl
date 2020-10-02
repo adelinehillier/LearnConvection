@@ -156,7 +156,7 @@ function ReadJLD2_OceananigansData(filename)
         t[j] = les_data["timeseries"]["t"][key]
     end
 
-    tke = 0.5*(uu.^2 .+ vv.^2 .+ ww.^2)
+    tke = 0.5*(uu.^2 .+ vv.^2 .+ ww.^2) .* 2e8
 
     # Set initial Conditions
     @. T⁰ = T[:,1]
