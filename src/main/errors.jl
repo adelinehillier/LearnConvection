@@ -30,7 +30,7 @@ function get_me_greedy_check(ℳ, 𝒟::ProfileData)
     n = length(validation_set)
     for j in 1:n
         test_index = validation_set[j]
-        y_prediction = model_output(𝒟.x[test_index], i, ℳ, 𝒟)
+        y_prediction = model_output(𝒟.x[test_index], test_index, ℳ, 𝒟)
         error = euclidean_distance(y_prediction, 𝒟.y[test_index])
         total_error += error
     end

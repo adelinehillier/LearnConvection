@@ -78,7 +78,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
     elseif typeof(𝒟.problem) <: SlackProblem
         # Predict temperature profile at each timestep using model-predicted difference between truth and physics-based model (KPP or TKE) prediction
-        gpr_prediction = [GaussianProcess.model_output(𝒟.x[i], i, ℳ, 𝒟) for i in 1:(𝒟.Nt)]
+        gpr_prediction = [model_output(𝒟.x[i], i, ℳ, 𝒟) for i in 1:(𝒟.Nt)]
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
         ##
         # animate_physics_profile(ℳ, 𝒟)

@@ -11,15 +11,17 @@ modify_pred_fns = [
     partial_temp_profile(17:32),
 ]
 
-f = default_modify_predictor_fn
+f = append_tke
 
-problems = [Sequential("T"; modify_predictor_fn=f),
-            Sequential("T"; modify_predictor_fn=f),
-            Sequential("dT"; modify_predictor_fn=f),
+problems = [
+            Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
+            Slack("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
             Residual("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
             Residual("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
             Sequential("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
-            Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f)
+            Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
+            Sequential("T"; modify_predictor_fn=f),
+            Sequential("dT"; modify_predictor_fn=f),
 ]
 
 ## Interpolation
