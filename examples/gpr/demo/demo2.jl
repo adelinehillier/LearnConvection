@@ -43,7 +43,7 @@ for problem in problems
     𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
     𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
 
-    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-2.0:0.1:1.0, distances=[euclidean_distance])
+    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-2.0:0.1:2.0, distances=[euclidean_distance])
 
 end
 
