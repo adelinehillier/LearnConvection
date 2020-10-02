@@ -43,7 +43,7 @@ for problem in problems
     𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
     𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
 
-    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0)
+    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-2.0:0.1:1.0, distances=[euclidean_distance])
 
 end
 
@@ -59,18 +59,18 @@ end
 
 ## Extrapolation
 
-train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
-validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
-test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
-
-for problem in problems
-
-    println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
-
-    𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
-    𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
-    𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
-
-    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0)
-
-end
+# train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
+# validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
+# test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
+#
+# for problem in problems
+#
+#     println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
+#
+#     𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
+#     𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
+#     𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
+#
+#     train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0, distances=[euclidean_distance])
+#
+# end

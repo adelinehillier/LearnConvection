@@ -28,7 +28,7 @@ problem  = Residual("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("KPP"; parameters=KPP.Parameters())
 problem = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
-problem = Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f)
+problem = Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=append_tke)
 
 k = 2
 logγ = -0.4

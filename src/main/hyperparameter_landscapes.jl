@@ -9,9 +9,10 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     # Optimize hyperparameter values by testing on filenames in validate;
     # Compute error on the filenames in test.
 
-    min_logγs       = zeros(3,5)
-    validate_errors = zeros(3,5)
-    test_errors     = zeros(3,5)
+    nd = length(distances)
+    min_logγs       = zeros(nd,5)
+    validate_errors = zeros(nd,5)
+    test_errors     = zeros(nd,5)
 
     for k in 1:4, (i, d) in enumerate(distances)
         min_logγ, min_error_validate, test_error = get_min_gamma(k, d, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
@@ -22,7 +23,7 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
 
     # for rational quadratic kernel, have 2 hyperparameters to optimize
     k=5
-    for (i, d) in enumerate([euclidean_distance, derivative_distance, antiderivative_distance])
+    for (i, d) in enumerate(distances)
         min_logγ, min_error_validate, test_error = get_min_gamma_alpha(k, d, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=log_γs)
         min_logγs[i,5]       = min_logγ
         validate_errors[i,5] = min_error_validate
