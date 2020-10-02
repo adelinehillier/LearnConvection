@@ -38,7 +38,7 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     println("TEST Mean Error")
     println(test_errors)
 
-    a = argmin(min_logγs)
+    a = argmin(test_errors)
     d = a[1]
     k = a[2]
     logγ    = min_logγs[d,k]
