@@ -26,8 +26,8 @@ for Q in Qs
     problem = Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
 
     optimized_kernel = LearnConvection.optimize_SMP_kernel(𝒟_train, 𝒟_validate, 𝒟_test; Q=1)
-    𝒢 = LearnConvection.GaussianProcess.model(𝒟; kernel=optimized_kernel)
-    anim = animate_profile(𝒢, 𝒟)
+    𝒢 = LearnConvection.GaussianProcess.model(𝒟_test; kernel=optimized_kernel)
+    anim = animate_profile(𝒢, 𝒟_test)
 
     gif(anim,"$(typeof(problem))_$(problem.type)_Q_$(Q)_interpolation.gif")
 end
