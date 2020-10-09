@@ -43,6 +43,7 @@ export
         # Main / errors.jl
         get_me_true_check,
         get_me_greedy_check,
+        disparity_vector,
 
         # Main / plot_profile.jl
         plot_profile,
@@ -51,7 +52,10 @@ export
         animate_profile_and_model_output,
 
         # Main / predict.jl
-        predict
+        predict,
+
+        # Main / optimize_smp.jl
+        optimize_SMP_kernel
 
         # kernel options
         #  1   =>   "Squared exponential"         => "Squared exponential kernel:        k(x,x') = σ * exp( - ||x-x'||² / 2γ² )",
@@ -66,7 +70,8 @@ using Plots,
       NetCDF,
       Statistics,
       # LinearAlgebra,
-      BenchmarkTools
+      BenchmarkTools,
+      Optim
 
 # OceanTurb for KPP
 using OceanTurb

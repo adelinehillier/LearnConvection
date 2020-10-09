@@ -13,6 +13,8 @@ export  Kernel,
         Matern12I,
         Matern32I,
         Matern52I,
+        SpectralMixtureProductI,
+        SpectralMixtureProductA,
         kernel_function
 
 include("distances.jl")
@@ -52,16 +54,28 @@ Returns a Kernel object with the specified parameters.
  4   =>   "Matérn with ʋ=5/2:                 k(x,x') = σ * ( 1 + √(5)*d(x,x'))/γ + 5*d(x,x')²/(3*γ^2) ) * exp(-√(5)*d(x,x'))/γ)",
  5   =>   "Rational quadratic kernel:         k(x,x') = σ * (1+(x-x')'*(x-x')/(2*α*(γ²))^(-α)",
 """
-function get_kernel(kernel_id::Int64, logγ, logσ, distance; logα=0.0)
+# function get_kernel(kernel_id::Int64, logγ, logσ, distance; logα=0.0)
+#         # convert from log10 scale
+#         γ = 10^logγ
+#         σ = 10^logσ
+#         α = 10^logα
+#         if kernel_id==1; return SquaredExponentialI(γ, σ, distance) end
+#         if kernel_id==2; return Matern12I(γ, σ, distance) end
+#         if kernel_id==3; return Matern32I(γ, σ, distance) end
+#         if kernel_id==4; return Matern52I(γ, σ, distance) end
+#         if kernel_id==5; return RationalQuadraticI(γ, σ, α, distance)
+#         else; throw(error()) end
+# end
+function get_kernel(kernel_id::Int64, args...)
         # convert from log10 scale
-        γ = 10^logγ
-        σ = 10^logσ
-        α = 10^logα
-        if kernel_id==1; return SquaredExponentialI(γ, σ, distance) end
-        if kernel_id==2; return Matern12I(γ, σ, distance) end
-        if kernel_id==3; return Matern32I(γ, σ, distance) end
-        if kernel_id==4; return Matern52I(γ, σ, distance) end
-        if kernel_id==5; return RationalQuadraticI(γ, σ, α, distance)
+        # args = 10 .^ args
+        args = (10^num for num in args if typeof(num) <: Number)
+        if kernel_id==1; return SquaredExponentialI(args) end
+        if kernel_id==2; return Matern12I(args) end
+        if kernel_id==3; return Matern32I(args) end
+        if kernel_id==4; return Matern52I(args) end
+        if kernel_id==5; return RationalQuadraticI(args) end
+        if kernel_id==6; return SMP(args)
         else; throw(error()) end
 end
 

@@ -4,10 +4,11 @@ Constructors for covariance (kernel) functions.
       Constructor                   Description                                Isotropic/Anisotropic
     - SquaredExponentialI(γ,σ):     squared exponential covariance function    isotropic
     - ExponentialI(γ,σ):            exponential covariance function            isotropic
-    - RationalQuadraticI():         rational quadratic covariance function     isotropic
-    - Matern12I():                  Matérn covariance function with ʋ = 1/2.   isotropic
-    - Matern32I():                  Matérn covariance function with ʋ = 3/2.   isotropic
-    - Matern52I():                  Matérn covariance function with ʋ = 5/2.   isotropic
+    - RationalQuadraticI(γ,σ,α):    rational quadratic covariance function     isotropic
+    - Matern12I(γ,σ):               Matérn covariance function with ʋ = 1/2.   isotropic
+    - Matern32I(γ,σ):               Matérn covariance function with ʋ = 3/2.   isotropic
+    - Matern52I(γ,σ):               Matérn covariance function with ʋ = 5/2.   isotropic
+    - SMP(w,μ,γ):                   Spectral mixture product cov. function
 
 Distance metrics
 
@@ -24,11 +25,11 @@ abstract type Kernel end
 """ SquaredExponentialI(γ,σ): squared exponential covariance function, isotropic """
 struct SquaredExponentialI{T<:Float64} <: Kernel
     # Hyperparameters
-    "Length scale"
+    # "Length scale"
     γ::T
-    "Signal variance"
+    # "Signal variance"
     σ::T
-    "Distance metric"
+    # "Distance metric"
     d::Function
 end
 
@@ -115,6 +116,80 @@ function kernel_function(k::Matern52I; z=nothing)
   return evaluate
 end
 
+struct SpectralMixtureProductI{T<:Array{Float64}} <: Kernel
+    """Mixture weights"""
+    w::T
+    """Spectral means"""
+    μ::T
+    """Spectral variances"""
+    γ::T
+end
+
+function SpectralMixtureProductI(hyp)
+    if length(hyp) % 3 != 0
+        throw(error("Inconsistent number of components. Length of parameter vector should be a multiple of three."))
+    end
+
+    Q = Int(length(hyp)/3)
+
+    SpectralMixtureProductI(hyp[1:Q],hyp[Q+1:2Q],hyp[2Q+1:3Q])
+end
+
+function kernel_function(k::SpectralMixtureProductI; z=nothing)
+
+    h(arg1, arg2) = exp.(-0.5 * arg1) .* cos.(arg2)
+    w = (k.w .^2)' # square mixture weights
+
+    function evaluate(a,b)
+        τ = (a .- b) * 2*pi
+        D  = length(a)
+
+        K = 1
+        for d=1:D
+            # println(w)
+            # println(h((τ[d] .^ 2)*k.γ, τ[d]*k.μ))
+            K *= w * h((τ[d] .^ 2)*k.γ, τ[d]*k.μ)
+        end
+        K
+    end
+   return evaluate
+end
+
+struct SpectralMixtureProductA{T<:Array{Float64}} <: Kernel
+    """Mixture weights"""
+    w::T # D x Q array
+    """Spectral means"""
+    μ::T # D x Q array
+    """Spectral variances"""
+    γ::T # D x Q array
+end
+
+function SpectralMixtureProductA(hyp, D)
+    Q = Int(floor(length(hyp)/(3D)))
+    w = reshape(  hyp[                      1:D*Q],D,Q);   # mixture weights
+    μ = reshape(  hyp[D .* Q .+           (1:D*Q)],D,Q);   # spectral means
+    γ = reshape(  hyp[D .* Q .+ D .* Q .+ (1:D*Q)],D,Q);   # spectral variances
+    SpectralMixtureProductA(w, μ, γ)
+end
+
+function kernel_function(k::SpectralMixtureProductA; z=nothing)
+    h(arg1, arg2) = exp.(-0.5 * arg1).*cos.(arg2);
+    w = k.w .^2 # square mixture weights
+    function evaluate(a,b)
+        τ = (a .- b) * 2*pi
+
+        D,Q  = size(k.w)
+
+        K = 1
+        for d=1:D
+            K = K .* (w[d,:]' * h((τ[d] .^ 2)*k.γ[d,:], τ[d]*k.μ[d,:]) )
+        end
+        K
+    end
+  return evaluate
+end
+
+##
 
 # """
 # https://github.com/alshedivat/gpml/blob/master/cov/covSM.m
@@ -128,17 +203,19 @@ end
 #
 # """
 
-# struct SMP
-#     # Hyperparameters
-#     hyp
-# end
 #
+
+# function 🍮(🍨, 🍳, 😎)
+#     🍨 + 🍳+ 😎
+# end
+
+##
 # function SMP(Q,hyp,a,b)
 #       D = length(a);
-#       n = 1                                        # dimensionality
-#       w = reshape(  hyp(         1:D*Q) ,D,Q);     # mixture weights
-#       m = reshape(  hyp(D*Q+    (1:D*Q)),D,Q);     # spectral means
-#       v = reshape(2*hyp(D*Q+D*Q+(1:D*Q)),D,Q);     # spectral variances
+#       n = 1                                                   # dimensionality
+#       w = reshape(  hyp[                     1:D*Q],D,Q);     # mixture weights
+#       m = reshape(  hyp[D .* Q .+           (1:D*Q)],D,Q);    # spectral means
+#       v = reshape(2*hyp[D .* Q .+ D .* Q .+ (1:D*Q)],D,Q);    # spectral variances
 #
 #       T = 2*pi*bsxfun(@minus,reshape(a,n,1,D),reshape(b,1,[],D));
 #
@@ -149,9 +226,9 @@ end
 #       m = reshape(m,Q,D)';
 #       v = reshape(v,Q,D)';
 #
-#       h(t2v, tm) = exp(-0.5*t2v).*cos(tm);
+#       h(t2v, tm) = exp(-0.5 * t2v).*cos(tm);
 #       for d=1:D
-#           K = K .* ( h( (T(:,d).*T(:,d))*v(d,:), T(:,d)*m(d,:) )*w(d,:)' );
+#           K = K .* ( h( (T[:,d] .* T[:,d]) * v[d,:], T(:,d)*m(d,:) )*w[d,:]' );
 #       end
 #       K = reshape(K.*ones(size(T,1),1),n,[]);
 #
@@ -203,3 +280,70 @@ end
 # end
 #
 #
+
+# function SMP(hyp,a,b)
+#
+#       τ = (a .- b) * 2*pi
+#
+#       D = length(a);
+#       Q = Int(length(hyp)/(3*D))
+#
+#       println(Q)
+#
+#       w .^= 2 # square mixture weights
+#
+#       h(arg1, arg2) = exp.(-0.5 * arg1).*cos.(arg2);
+#
+#       K = 1;
+#       for d=1:D
+#           K = K .* ( h((τ[d] .^ 2)*γ[d,:], τ[d]*μ[d,:] ) * w[d,:]' );
+#       end
+#       K
+# end
+
+# hyp = [3,3,3,4,4,4,2.095, 2.095, 2.095]
+#
+# γ = 3*0.0001
+#
+# fn = kernel_function(SMP(hyp, 3); z=nothing)
+# fn2 = kernel_function(SquaredExponentialI2(0.1, 3.0, euclidean_distance))
+#
+# fn([1,2,3], [5,7,8])
+# fn2([1,2,3], [5,7,8])
+#
+# a = [0.03, 0.04]
+# b = [0.0, 0.0]
+# hyp = [1,2,0.1,0.4,2,1]
+# fn = kernel_function(SMP(hyp, 2); z=nothing)
+# fn(a,b)
+#
+#
+# SMP(zeros(18), [1,2,3],[4,5,6])
+# SMP(5*ones(18), [1,2,3],[4,5,6])
+# SMP(hyp, [1,2,3],[4,5,7])
+#
+#
+# a= [1,2,3]
+# b= [7,6,5]
+#
+# τ = (a .- b) * 2*pi
+#
+# D = length(a);
+# Q = Int(length(hyp)/(3*D))
+#
+# println(Q)
+# w = reshape(  hyp[                      1:D*Q],D,Q);   # mixture weights
+# μ = reshape(  hyp[D .* Q .+           (1:D*Q)],D,Q);   # spectral means
+# γ = reshape(2*hyp[D .* Q .+ D .* Q .+ (1:D*Q)],D,Q);   # spectral variances
+#
+# w .^= 2 # square mixture weights
+#
+# h(arg1, arg2) = exp.(-0.5 * arg1).*cos.(arg2);
+#
+# K = 1
+# for d=1:D
+#     println(h((τ[d] .^ 2)*γ[d,:], τ[d]*μ[d,:] ))
+#     println(w[d,:]')
+#     K .*= ( w[d,:]' * h((τ[d] .^ 2)*γ[d,:], τ[d]*μ[d,:] ));
+# end
+# K

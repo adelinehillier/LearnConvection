@@ -36,3 +36,19 @@ function get_me_greedy_check(ℳ, 𝒟::ProfileData)
     end
     return total_error / n
 end
+
+function disparity_vector(ℳ, 𝒟::ProfileData)
+
+    total_error = 0.0
+    gpr_prediction = predict(ℳ, 𝒟; postprocessed=true)
+
+    total_error = zeros(length(𝒟.vavg[1])) # D
+    n = length(gpr_prediction)
+    for i in 1:n
+        exact = 𝒟.vavg[i]
+        predi = gpr_prediction[i]
+        total_error .+= exact .- predi # euclidean distance
+    end
+
+    return abs.(total_error / n)
+end
