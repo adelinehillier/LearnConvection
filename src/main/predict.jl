@@ -68,15 +68,30 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
         end
 
     elseif typeof(𝒟.problem) <: SequentialProblem
-        # Predict temperature profile from start to finish without the training data.
-        gpr_prediction = similar(𝒟.y)
-        gpr_prediction[1] = 𝒟.y[1] # starting profile
 
-        for i in 1:(length(𝒟.y)-1)
-            gpr_prediction[i+1] = model_output(gpr_prediction[i], i, ℳ, 𝒟)
-            𝒟.convective_adjust(gpr_prediction[i+1])
+        # Predict temperature profile from start to finish without the training data.
+
+        gpr_prediction=Array{Array{Float64,1},1}()
+        postprocessed_prediction=Array{Array{Float64,1},1}()
+        t=1 # time index
+        for (problem, n_x) in 𝒟.all_problems # n_x: number of predictors (i.e. time steps) for that problem
+
+            post_pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
+            gpr__pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
+            post_pred_chunk[1] = unscale(𝒟.x[t], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
+            gpr__pred_chunk[1] = 𝒟.y[t] # residual -- should be zeros for this initial time step. Good sanity check.
+
+            for i in 1:n_x-1
+                predictor = scale(post_pred_chunk[i], problem.scaling)
+                gpr__pred_chunk[i+1] = model_output(predictor, t, ℳ, 𝒟)
+                post_pred_chunk[i+1] = postprocess_prediction(predictor, gpr__pred_chunk[i+1], problem)
+                𝒟.convective_adjust(post_pred_chunk[i+1])
+            end
+
+            gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
+            postprocessed_prediction = vcat(postprocessed_prediction, post_pred_chunk)
+            t += n_x
         end
-        postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
 
     elseif typeof(𝒟.problem) <: SlackProblem
         # Predict temperature profile at each timestep using model-predicted difference between truth and physics-based model (KPP or TKE) prediction

@@ -1,7 +1,7 @@
 using LearnConvection
 problem = Sequential("KPP"; parameters=KPP.Parameters())
 
-train = ["general_strat_8_profiles.jld2"]
+train = ["general_strat_32_profiles.jld2"]
 
 k = 2
 logγ = -0.4
@@ -13,5 +13,5 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 
 using BenchmarkTools
 @btime predict(𝒢, 𝒟; postprocessed=true)
-
+𝒟.Nt
 @btime animate_profile(𝒢, 𝒟)

@@ -18,7 +18,6 @@ The gpr_prediction is computed outside this function for efficiency.
 - `gpr_prediction` (Array). Output of get_gpr_pred (which should only be computed once) on ℳ and 𝒟.
 """
 function plot_profile(ℳ, 𝒟::ProfileData, time_index, gpr_prediction)
-
     day_string = string(floor(Int, 𝒟.t[time_index]/86400))
     variable = 𝒟.problem.variable # "T" or "wT"
     xlims = x_lims[variable]
@@ -36,7 +35,7 @@ function animate_profile(ℳ, 𝒟)
     xlims = x_lims[variable]
 
     predi = predict(ℳ, 𝒟; postprocessed=true)
-
+    
     animation_set = 1:30:(𝒟.Nt-2)
     anim = @animate for i in animation_set
         exact = 𝒟.v[:,i]

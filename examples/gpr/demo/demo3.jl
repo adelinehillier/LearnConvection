@@ -36,8 +36,10 @@ problem = Sequential("TKE";
                 parameters=TKEMassFlux.TKEParameters(),
                 convective_adjust=false)
 
+problem  = Sequential("dT")
+
 k = 2
-logγ = -0.4
+logγ = 1.0
 distance = euclidean_distance
 kernel   = get_kernel(k, logγ, 0.0, distance)
 
@@ -47,6 +49,7 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 
 get_me_true_check(𝒢, 𝒟_test)
 # anim = animate_profile(𝒢, 𝒟_test)
+anim = animate_profile(𝒢, 𝒟_train)
 
 anim = animate_profile_and_model_output(𝒢, 𝒟_train)
 gif(anim, "all.gif")
