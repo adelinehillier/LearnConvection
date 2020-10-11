@@ -10,13 +10,13 @@ test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
 
 Qs = [1,2]
 problems = [
-            Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
-            Slack("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
-            Residual("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
-            Residual("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
-            Sequential("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
-            Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
-            Sequential("dT"; modify_predictor_fn=f),
+            Slack("KPP"; parameters=KPP.Parameters()),
+            Slack("TKE"; parameters=TKEMassFlux.TKEParameters()),
+            Residual("KPP"; parameters=KPP.Parameters()),
+            Residual("TKE"; parameters=TKEMassFlux.TKEParameters()),
+            Sequential("TKE"; parameters=TKEMassFlux.TKEParameters()),
+            Sequential("KPP"; parameters=KPP.Parameters()),
+            Sequential("dT")
 ]
 
 for Q in Qs
