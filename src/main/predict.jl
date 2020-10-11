@@ -1,3 +1,4 @@
+
 """
 # Description
 Predict profile across all time steps for the true check.
@@ -14,7 +15,6 @@ Returns an n-length array of D-length vectors, where n is the number of training
                                     If true, return the full predicted temperature profile calculated from the model output.
                                     If "both", return both.
 """
-
 function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
     if typeof(𝒟.problem) <: Union{Sequential_KPP, Sequential_TKE}
@@ -34,6 +34,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
                 gpr__pred_chunk[i+1] = model_output(scale(post_pred_chunk[i], problem.scaling), t, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
+                𝒟.convective_adjust(post_pred_chunk[i+1])
             end
 
             gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
@@ -58,6 +59,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)
                 gpr__pred_chunk[i+1] = model_output(kpp_pred, t, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(kpp_pred, gpr__pred_chunk[i+1], problem)
+                𝒟.convective_adjust(post_pred_chunk[i+1])
             end
 
             gpr_prediction = vcat(gpr_prediction, gpr__pred_chunk)
@@ -71,8 +73,8 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
         gpr_prediction[1] = 𝒟.y[1] # starting profile
 
         for i in 1:(length(𝒟.y)-1)
-            y_prediction = model_output(gpr_prediction[i], i, ℳ, 𝒟)
-            gpr_prediction[i+1] = y_prediction
+            gpr_prediction[i+1] = model_output(gpr_prediction[i], i, ℳ, 𝒟)
+            𝒟.convective_adjust(gpr_prediction[i+1])
         end
         postprocessed_prediction = get_postprocessed_predictions(𝒟.x, gpr_prediction, 𝒟.all_problems)
 

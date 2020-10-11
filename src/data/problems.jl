@@ -14,22 +14,25 @@ struct Sequential <: SequentialProblem
     type::String # "T" or "dT" or "wT" or "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
     modify_predictor_fn
+    convective_adjust
 end
-Sequential(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn) = Sequential(type, parameters, modify_predictor_fn)
+Sequential(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn, convective_adjust=false) = Sequential(type, parameters, modify_predictor_fn, convective_adjust)
 
 struct Residual <: ResidualProblem
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
     modify_predictor_fn
+    convective_adjust
 end
-Residual(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn) = Residual(type, parameters, modify_predictor_fn)
+Residual(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn, convective_adjust=false) = Residual(type, parameters, modify_predictor_fn, convective_adjust)
 
 struct Slack <: SlackProblem
     type::String # "KPP" or "TKE"
     parameters # Parameters(...) (see OceanTurb documentation)
     modify_predictor_fn
+    convective_adjust
 end
-Slack(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn) = Slack(type, parameters, modify_predictor_fn)
+Slack(type; parameters=nothing, modify_predictor_fn=default_modify_predictor_fn, convective_adjust=false) = Slack(type, parameters, modify_predictor_fn, convective_adjust)
 
 mutable struct Sequential_dT <: SequentialProblem
     variable::String #"T" or "wT"

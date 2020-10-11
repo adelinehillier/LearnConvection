@@ -48,6 +48,9 @@ include("modify_predictor_fns.jl")
 export append_tke,
        partial_temp_profile
 
+include("convective_adjust.jl")
+export convective_adjust!
+
 # running OceanTurb KPP simulations based on OceananigansData conditions
 include("../kpp/run.jl")
 export closure_free_convection_kpp_full_evolution,
@@ -110,6 +113,7 @@ struct ProfileData
     all_problems::Array{Array{Any,1},1}
     state_variables::StateVariables
     modify_predictor_fn::Function
+    convective_adjust::Function
 end
 
 """
@@ -159,6 +163,13 @@ function data(filename::String, problem::Problem; D=16, N=4)
     # modify_predictor_fn
     modify_predictor_fn(state, time_index) = problem.modify_predictor_fn(state, time_index, state_variables)
 
+    # convective_adjust
+    if problem.convective_adjust
+        convective_adjust = convective_adjust!
+    else
+        convective_adjust = x -> x
+    end
+
     # get problem (sets how the data will be pre- and post-processed)
     specific_problem = get_problem(problem, les, v, N², D, Nt)
 
@@ -181,7 +192,7 @@ function data(filename::String, problem::Problem; D=16, N=4)
     # (preprocessing is already taken care of before the data is merged)
     all_problems = [[specific_problem, length(x)]]
 
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, specific_problem, all_problems, state_variables, modify_predictor_fn)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, z, zavg, t, Nt, specific_problem, all_problems, state_variables, modify_predictor_fn, convective_adjust)
 end
 
 """
@@ -241,7 +252,7 @@ function data(filenames::Vector{String}, problem::Problem; D=16, N=4)
     modify_predictor_fn(state, time_index) = problem.modify_predictor_fn(state, time_index, state_variables)
 
     # Note the problem is that from the first file in filenames. This is only included so that the problem type can be determined easily.
-    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems, state_variables, modify_predictor_fn)
+    return ProfileData(v, vavg, x, y, x_train, y_train, validation_set, 𝒟.z, 𝒟.zavg, t, Nt, 𝒟.problem, all_problems, state_variables, modify_predictor_fn, 𝒟.convective_adjust)
 end
 
 end # module

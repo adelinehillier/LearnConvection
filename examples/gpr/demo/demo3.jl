@@ -30,9 +30,11 @@ problem  = Sequential("KPP"; parameters=KPP.Parameters())
 problem = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
 
 default_modify_predictor_fn(x, 𝒟, time_index) = x
-
-problem = Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=append_tke)
 problem = Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=default_modify_predictor_fn)
+
+problem = Sequential("TKE";
+                parameters=TKEMassFlux.TKEParameters(),
+                convective_adjust=false)
 
 k = 2
 logγ = -0.4
@@ -43,7 +45,6 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
 
-get_me_true_check(𝒢, 𝒟_test)
 get_me_true_check(𝒢, 𝒟_test)
 # anim = animate_profile(𝒢, 𝒟_test)
 

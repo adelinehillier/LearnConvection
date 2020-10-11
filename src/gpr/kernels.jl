@@ -57,16 +57,16 @@ function kernel_function(k::RationalQuadraticI; z=nothing)
     function evaluate(a,b)
         l = (k.γ)^2 # squared length scale
      return k.σ * (1+(a-b)'*(a-b)/(2*k.α*l))^(-k.α)
- end
+  end
   return evaluate
 end
 
-struct Matern12I{T<:Float64} <: Kernel
+struct Matern12I <: Kernel
     # Hyperparameters
     "Length scale"
-    γ::T
+    γ::Float64
     "Signal variance"
-    σ::T
+    σ::Float64
     "Distance metric"
     d::Function
 end
@@ -79,11 +79,11 @@ end
 
 struct Matern32I{T<:Float64} <: Kernel
     # Hyperparameters
-    "Length scale"
+    # "Length scale"
     γ::T
-    "Signal variance"
+    # "Signal variance"
     σ::T
-    "Distance metric"
+    # "Distance metric"
     d::Function
 end
 
@@ -98,11 +98,11 @@ end
 
 struct Matern52I{T<:Float64} <: Kernel
     # Hyperparameters
-    "Length scale"
+    # "Length scale"
     γ::T
-    "Signal variance"
+    # "Signal variance"
     σ::T
-    "Distance metric"
+    # "Distance metric"
     d::Function
 end
 
@@ -117,11 +117,11 @@ function kernel_function(k::Matern52I; z=nothing)
 end
 
 struct SpectralMixtureProductI{T<:Array{Float64}} <: Kernel
-    """Mixture weights"""
+    # """Mixture weights"""
     w::T
-    """Spectral means"""
+    # """Spectral means"""
     μ::T
-    """Spectral variances"""
+    # """Spectral variances"""
     γ::T
 end
 
@@ -156,11 +156,11 @@ function kernel_function(k::SpectralMixtureProductI; z=nothing)
 end
 
 struct SpectralMixtureProductA{T<:Array{Float64}} <: Kernel
-    """Mixture weights"""
+    # """Mixture weights"""
     w::T # D x Q array
-    """Spectral means"""
+    # """Spectral means"""
     μ::T # D x Q array
-    """Spectral variances"""
+    # """Spectral variances"""
     γ::T # D x Q array
 end
 

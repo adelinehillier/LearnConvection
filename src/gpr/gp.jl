@@ -27,7 +27,22 @@ struct GP{Kernel, 𝒮, 𝒮2, 𝒰, 𝒱}
 end
 
 """
-construct_gpr(x_train, y_train; kernel; sparsity_threshold = 0.0, robust = true, entry_threshold = sqrt(eps(1.0)))
+GP_multiple
+# Description
+- data structure for GPR computations where each gridpoint in the prediction has a different predictor
+# Data Structure and Description
+    GPs, Array of GP objects
+    kernel, Kernel object
+    x_train
+"""
+struct GP_multiple
+    GPs::Array{GP}
+    kernel::Kernel
+    x_train
+end
+
+"""
+model(x_train, y_train; kernel; sparsity_threshold = 0.0, robust = true, entry_threshold = sqrt(eps(1.0)))
 # Description
 Constructs the posterior distribution for a gp. In other words this does the 'training' automagically.
 # Arguments
@@ -82,9 +97,40 @@ function model(x_train, y_train, kernel, zavg; sparsity_threshold = 0.0, robust 
     return GP(kernel, x_train, α', K, Array(CK))
 end
 
-function model(𝒟::ProfileData; kernel::Kernel = Kernel())
+function stencil_range(D, stencil_size, i)
+    k = Int(floor(stencil_size/2))
+    if i-k < 1
+        return 1:stencil_size
+    elseif i-k+stencil_size-1 > D
+        return D-stencil_size+1:D
+    else
+        start = i-k
+        start:start+stencil_size-1
+    end
+end
+
+stencil(stencil_range, data) = [x[stencil_range] for x in data]
+
+"""
+model(𝒟::ProfileData; kernel::Kernel = Kernel(), stencil_size=nothing)
+# Description
+Create an instance of GP using data from ProfileData object 𝒟.
+# Arguments
+- 𝒟::ProfileData, Data for training the GP
+# Keyword Arguments
+- kernel::Kernel,
+- stencil_size::Int64
+"""
+function model(𝒟::ProfileData; kernel::Kernel = Kernel(), stencil_size::Int64=0)
     # create instance of GP using data from ProfileData object
-    return model(𝒟.x_train, 𝒟.y_train, kernel, 𝒟.zavg);
+    if stencil_size == 0
+        return model(𝒟.x_train, 𝒟.y_train, kernel, 𝒟.zavg);
+    end
+
+    # create instance of GP using data from ProfileData object
+    stencil_ranges = [stencil_range(D,stencil_size,i) for i=1:D]
+    GPs = [model(stencil(𝒟.x_train,r), stencil(𝒟.y_train,r), kernel, 𝒟.zavg[r]) for range in stencil_ranges]
+    return GP_multiple(GPs, kernel, 𝒟.x_train);
 end
 
 """
@@ -100,6 +146,22 @@ prediction(x, 𝒢::GP)
 function model_output(x, 𝒢::GP)
     return 𝒢.α * 𝒢.kernel.([x], 𝒢.x_train)
 end
+
+"""
+prediction(x, 𝒢::GP_multiple)
+# Description
+- Given state x, GP_multiple 𝒢, returns the mean GP prediction
+# Arguments
+- `x`: single scaled state
+- `𝒢`: GP_multiple object with which to make the prediction
+# Return
+- `y`: scaled prediction
+"""
+function model_output(x, 𝒢::GP_multiple)
+    return [model_output(x[i],𝒢.GPs[i]) for i in 1:length(x)]
+end
+
+
 
 """
 uncertainty(x, 𝒢::GP)

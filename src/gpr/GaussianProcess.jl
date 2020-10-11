@@ -66,16 +66,24 @@ Returns a Kernel object with the specified parameters.
 #         if kernel_id==5; return RationalQuadraticI(γ, σ, α, distance)
 #         else; throw(error()) end
 # end
+
 function get_kernel(kernel_id::Int64, args...)
-        # convert from log10 scale
-        # args = 10 .^ args
-        args = (10^num for num in args if typeof(num) <: Number)
-        if kernel_id==1; return SquaredExponentialI(args) end
-        if kernel_id==2; return Matern12I(args) end
-        if kernel_id==3; return Matern32I(args) end
-        if kernel_id==4; return Matern52I(args) end
-        if kernel_id==5; return RationalQuadraticI(args) end
-        if kernel_id==6; return SMP(args)
+        # args = f.(args) # convert from log10 scale
+
+        function g(x)
+                if typeof(x) <: Number
+                        return 10^x end
+                return x
+        end
+
+        args = g.(args)
+
+        if kernel_id==1; return SquaredExponentialI(args...) end
+        if kernel_id==2; return Matern12I(args...) end
+        if kernel_id==3; return Matern32I(args...) end
+        if kernel_id==4; return Matern52I(args...) end
+        if kernel_id==5; return RationalQuadraticI(args...) end
+        if kernel_id==6; return SpectralMixtureProductI(args...)
         else; throw(error()) end
 end
 
