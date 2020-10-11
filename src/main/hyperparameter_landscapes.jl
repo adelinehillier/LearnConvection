@@ -4,7 +4,7 @@ using StaticArrays
 # include("gp.jl")
 # include("errors.jl")
 
-function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0, distances=[euclidean_distance, derivative_distance, antiderivative_distance])
+function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0, distances=[euclidean_distance, derivative_distance, antiderivative_distance],descriptor="")
     # Train GP on the filenames in train;
     # Optimize hyperparameter values by testing on filenames in validate;
     # Compute error on the filenames in test.
@@ -45,7 +45,7 @@ function train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_
     kernel  = get_kernel(k, logγ, 0.0, distances[d])
     ℳ      = model(𝒟_train; kernel=kernel)
     anim    = animate_profile_and_model_output(ℳ, 𝒟_test)
-    gif(anim, "$(typeof(problem))_$(problem.type)_kernel_$(k)_gamma_$(logγ).gif");
+    gif(anim, "$(descriptor)_$(typeof(problem))_$(problem.type)_kernel_$(k)_gamma_$(logγ).gif");
 
     println("===============")
     println("-- kernel ............. $(k)")

@@ -8,8 +8,14 @@ test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2", "gene
 
 Qs = [2]
 problems = [
-    Slack("KPP"; parameters=KPP.Parameters()),
-    Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
+            Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
+            Slack("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
+            Residual("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
+            Residual("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
+            Sequential("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f),
+            Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
+            Sequential("T"; modify_predictor_fn=f),
+            Sequential("dT"; modify_predictor_fn=f),
 ]
 
 for Q in Qs

@@ -11,7 +11,7 @@ modify_pred_fns = [
     partial_temp_profile(17:32),
 ]
 
-f = append_tke
+f = default_modify_predictor_fn
 
 problems = [
             Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f),
@@ -30,7 +30,11 @@ train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
 validate = ["general_strat_12_profiles.jld2", "general_strat_24_profiles.jld2"]
 test = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2", "general_strat_20_profiles.jld2", "general_strat_28_profiles.jld2"]
 
-##
+## Extrapolation
+
+train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
+validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
+test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
 
 D=32
 N=4
@@ -43,9 +47,40 @@ for problem in problems
     𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
     𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
 
-    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-2.0:0.1:2.0, distances=[euclidean_distance])
+    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-2.0:0.1:2.0, distances=[euclidean_distance], descriptor="extrapolation")
 
 end
+
+
+
+problems = [
+            Residual("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f, convective_adjust=true),
+            Residual("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f, convective_adjust=true),
+            Sequential("TKE"; parameters=TKEMassFlux.TKEParameters(), modify_predictor_fn=f, convective_adjust=true),
+            Sequential("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=f, convective_adjust=true),
+            Sequential("T"; modify_predictor_fn=f, convective_adjust=true),
+            Sequential("dT"; modify_predictor_fn=f, convective_adjust=true),
+]
+
+train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
+validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
+test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
+
+D=32
+N=4
+
+for problem in problems
+
+    println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
+
+    𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
+    𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
+    𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
+
+    train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-2.0:0.1:2.0, distances=[euclidean_distance], descriptor="extrapolation_conv_adj")
+
+end
+
 
 # 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel=get_kernel(2,0.0,0.0,euclidean_distance))
 # predict(𝒢, 𝒟_train; postprocessed=true)
@@ -55,22 +90,3 @@ end
 # distance=euclidean_distance
 # get_min_gamma(k, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=-0.4:0.1:0.4)
 # get_min_gamma_alpha(5, distance, 𝒟_train, 𝒟_validate, 𝒟_test; log_γs=-0.4:0.1:0.4)
-
-
-## Extrapolation
-
-# train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
-# validate = ["general_strat_20_profiles.jld2", "general_strat_24_profiles.jld2"]
-# test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
-#
-# for problem in problems
-#
-#     println("--*--*--*--*--*--$(problem)--*--*--*--*--*--")
-#
-#     𝒟_train     = LearnConvection.Data.data(train, problem; D=D, N=N);
-#     𝒟_validate  = LearnConvection.Data.data(validate, problem; D=D, N=N);
-#     𝒟_test      = LearnConvection.Data.data(test, problem; D=D, N=N);
-#
-#     train_validate_test(𝒟_train, 𝒟_validate, 𝒟_test, problem; log_γs=-1.0:0.1:1.0, distances=[euclidean_distance])
-#
-# end
