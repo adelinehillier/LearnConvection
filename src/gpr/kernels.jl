@@ -23,12 +23,12 @@ abstract type Kernel end
 #  *--*--*--*--*--*--*--*--*--*--*--*
 
 """ SquaredExponentialI(γ,σ): squared exponential covariance function, isotropic """
-struct SquaredExponentialI{T<:Float64} <: Kernel
+struct SquaredExponentialI <: Kernel
     # Hyperparameters
     # "Length scale"
-    γ::T
+    γ::Float64
     # "Signal variance"
-    σ::T
+    σ::Float64
     # "Distance metric"
     d::Function
 end
@@ -40,14 +40,14 @@ function kernel_function(k::SquaredExponentialI; z=nothing)
   return evaluate
 end
 
-struct RationalQuadraticI{T<:Float64} <: Kernel
+struct RationalQuadraticI <: Kernel
     # Hyperparameters
     "Length scale"
-    γ::T
+    γ::Float64
     "Signal variance"
-    σ::T
+    σ::Float64
     "Shape parameter"
-    α::T
+    α::Float64
     "Distance metric"
     d::Function
 end
@@ -77,12 +77,12 @@ function kernel_function(k::Matern12I; z=nothing)
   return evaluate
 end
 
-struct Matern32I{T<:Float64} <: Kernel
+struct Matern32I <: Kernel
     # Hyperparameters
     # "Length scale"
-    γ::T
+    γ::Float64
     # "Signal variance"
-    σ::T
+    σ::Float64
     # "Distance metric"
     d::Function
 end
@@ -96,12 +96,12 @@ function kernel_function(k::Matern32I; z=nothing)
   return evaluate
 end
 
-struct Matern52I{T<:Float64} <: Kernel
+struct Matern52I <: Kernel
     # Hyperparameters
     # "Length scale"
-    γ::T
+    γ::Float64
     # "Signal variance"
-    σ::T
+    σ::Float64
     # "Distance metric"
     d::Function
 end
@@ -116,13 +116,13 @@ function kernel_function(k::Matern52I; z=nothing)
   return evaluate
 end
 
-struct SpectralMixtureProductI{T<:Array{Float64}} <: Kernel
+struct SpectralMixtureProductI <: Kernel
     # """Mixture weights"""
-    w::T
+    w::Array{Float64}
     # """Spectral means"""
-    μ::T
+    μ::Array{Float64}
     # """Spectral variances"""
-    γ::T
+    γ::Array{Float64}
 end
 
 function SpectralMixtureProductI(hyp)
@@ -155,13 +155,13 @@ function kernel_function(k::SpectralMixtureProductI; z=nothing)
    return evaluate
 end
 
-struct SpectralMixtureProductA{T<:Array{Float64}} <: Kernel
+struct SpectralMixtureProductA <: Kernel
     # """Mixture weights"""
-    w::T # D x Q array
+    w::Array{Float64} # D x Q array
     # """Spectral means"""
-    μ::T # D x Q array
+    μ::Array{Float64} # D x Q array
     # """Spectral variances"""
-    γ::T # D x Q array
+    γ::Array{Float64} # D x Q array
 end
 
 function SpectralMixtureProductA(hyp, D)
