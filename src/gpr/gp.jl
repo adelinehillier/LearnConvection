@@ -18,12 +18,13 @@ GP
     K::𝒰 , matrix or sparse matrix
     CK::𝒱, cholesky factorization of K
 """
-struct GP{Kernel, 𝒮, 𝒮2, 𝒰, 𝒱}
+struct GP{Kernel, 𝒮, 𝒮2, 𝒰, 𝒱, 𝒜}
     kernel::Kernel
     x_train::𝒮
     α::𝒮2
     K::𝒰
     CK::𝒱
+    cache::𝒜
 end
 
 """
@@ -39,6 +40,8 @@ struct GP_multiple
     GPs::Array{GP}
     kernel::Kernel
     x_train
+    stencil_size
+    stencil_ranges
 end
 
 """
@@ -94,7 +97,7 @@ function model(x_train, y_train, kernel, zavg; sparsity_threshold = 0.0, robust 
     α = CK \ y # α = K + σ_noise*I
 
     # construct struct
-    return GP(kernel, x_train, α', K, Array(CK))
+    return GP(kernel, x_train, α', K, Array(CK), zeros(length(x_train)))
 end
 
 function stencil_range(D, stencil_size, i)
@@ -109,7 +112,7 @@ function stencil_range(D, stencil_size, i)
     end
 end
 
-stencil(stencil_range, data) = [x[stencil_range] for x in data]
+stencil(data, stencil_range) = [x[stencil_range] for x in data]
 
 """
 model(𝒟::ProfileData; kernel::Kernel = Kernel(), stencil_size=nothing)
@@ -127,10 +130,11 @@ function model(𝒟::ProfileData; kernel::Kernel = Kernel(), stencil_size::Int64
         return model(𝒟.x_train, 𝒟.y_train, kernel, 𝒟.zavg);
     end
 
+    D = length(𝒟.x_train[1])
     # create instance of GP using data from ProfileData object
-    stencil_ranges = [stencil_range(D,stencil_size,i) for i=1:D]
-    GPs = [model(stencil(𝒟.x_train,r), stencil(𝒟.y_train,r), kernel, 𝒟.zavg[r]) for range in stencil_ranges]
-    return GP_multiple(GPs, kernel, 𝒟.x_train);
+    r = [stencil_range(D,stencil_size,i) for i=1:D]
+    GPs = [model(stencil(𝒟.x_train,r[i]), stencil(𝒟.y_train,i), kernel, 𝒟.zavg[r[i]]) for i=1:D]
+    return GP_multiple(GPs, kernel, 𝒟.x_train, stencil_size, r);
 end
 
 """
@@ -143,8 +147,15 @@ prediction(x, 𝒢::GP)
 # Return
 - `y`: scaled prediction
 """
+# function model_output(x, 𝒢::GP)
+#     return 𝒢.α * 𝒢.kernel.([x], 𝒢.x_train)
+# end
+
 function model_output(x, 𝒢::GP)
-    return 𝒢.α * 𝒢.kernel.([x], 𝒢.x_train)
+    for i in 1:length(𝒢.cache)
+        𝒢.cache[i] = 𝒢.kernel(x, 𝒢.x_train[i])
+    end
+    return 𝒢.α * 𝒢.cache
 end
 
 """
@@ -158,10 +169,9 @@ prediction(x, 𝒢::GP_multiple)
 - `y`: scaled prediction
 """
 function model_output(x, 𝒢::GP_multiple)
-    return [model_output(x[i],𝒢.GPs[i]) for i in 1:length(x)]
+    xs = [x[r] for r in 𝒢.stencil_ranges]
+    return [model_output(xs[i], 𝒢.GPs[i])[1] for i in 1:length(xs)]
 end
-
-
 
 """
 uncertainty(x, 𝒢::GP)

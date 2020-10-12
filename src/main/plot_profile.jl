@@ -35,7 +35,7 @@ function animate_profile(ℳ, 𝒟)
     xlims = x_lims[variable]
 
     predi = predict(ℳ, 𝒟; postprocessed=true)
-    
+
     animation_set = 1:30:(𝒟.Nt-2)
     anim = @animate for i in animation_set
         exact = 𝒟.v[:,i]
@@ -71,7 +71,7 @@ function animate_profile_and_model_output(ℳ, 𝒟)
     variable = 𝒟.problem.variable # "T" or "wT"
     xlims1 = x_lims[variable]
     # xlims2 = (minimum(minimum(𝒟.y))-0.005, maximum(maximum(𝒟.y))+0.02)
-    xlims2 = (minimum(minimum(𝒟.y)), maximum(maximum(𝒟.y)))
+    xlims2 = (minimum(minimum.(𝒟.y)), maximum(maximum.(𝒟.y)))
 
     model_output, predi = predict(ℳ, 𝒟; postprocessed="both")
 

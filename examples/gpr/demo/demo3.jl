@@ -27,7 +27,7 @@ problem  = Residual("KPP"; parameters=KPP.Parameters())
 problem  = Residual("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("KPP"; parameters=KPP.Parameters())
-problem = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
+problem  = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
 
 default_modify_predictor_fn(x, 𝒟, time_index) = x
 problem = Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=default_modify_predictor_fn)
@@ -45,6 +45,7 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 
 𝒟_train  = LearnConvection.Data.data(train, problem; D=D, N=N);
 𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
+𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel, stencil_size = 16)
 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
 
 get_me_true_check(𝒢, 𝒟_test)
@@ -116,31 +117,37 @@ end
 using LearnConvection
 using Plots
 
-# simulation data
-train    = ["general_strat_8_profiles.jld2", "general_strat_16_profiles.jld2"]
-test     = "general_strat_32_profiles.jld2"
+# problem
+problem  = Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
+
+# data
+train    = ["general_strat_32_profiles.jld2"]
+test     = ["general_strat_32_profiles.jld2"]
 D        = 32
 N        = 4
 
-# problem
-problem  = Residual("TKE"; parameters = TKEMassFlux.TKEParameters())
-
 # kernel
-k = 2
-logγ = -0.4
-distance = antiderivative_distance
-kernel   = get_kernel(k, logγ, 0.0, distance)
+k        = 1
+logγ     = 0.4
+logσ     = 0.0
+distance = euclidean_distance
+kernel   = get_kernel(k, logγ, logσ, distance)
 
 # data
 𝒟_train  = LearnConvection.Data.data(train, problem; D=D, N=N);
 𝒟_test   = LearnConvection.Data.data(test, problem; D=D, N=N);
 
-# model 𝒢 trained on 𝒟_train
-𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel)
+# 𝒢 is trained on 𝒟_train
+𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel = kernel, stencil_size=8)
 
-# animate the result, where 𝒢 is tested on 𝒟_test
+# animate the mean GP prediction, where 𝒢 is tested on 𝒟_test
 anim = animate_profile_and_model_output(𝒢, 𝒟_test)
-gif(anim, "all.gif")
+gif(anim, "basic_example_8.gif", fps=15)
+
+
+##
+
+
 
 
 

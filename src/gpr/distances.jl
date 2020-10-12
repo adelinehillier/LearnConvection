@@ -5,8 +5,7 @@
 # this is norm(a-b)^2 but more efficient
 function sq_mag(a,b) # ||a - b||^2
     ll = 0.0
-    indices = 1:length(a)
-    @inbounds for k in indices
+    @inbounds for k in 1:length(a)
         ll += (a[k]-b[k])^2
     end
     return ll
@@ -50,11 +49,11 @@ end
 """
 euclidean_distance: computes the Euclidean distance (l²-norm) between two vectors
 """
-function euclidean_distance(a,b,z) # d(x,x') = || x - x' ||
+@inline function euclidean_distance(a,b,z) # d(x,x') = || x - x' ||
     return sqrt(sq_mag(a,b))
 end
 
-function euclidean_distance(a,b) # d(x,x') = || x - x' ||
+@inline function euclidean_distance(a,b) # d(x,x') = || x - x' ||
     return sqrt(sq_mag(a,b))
 end
 

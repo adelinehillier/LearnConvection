@@ -16,6 +16,7 @@ Returns an n-length array of D-length vectors, where n is the number of training
                                     If "both", return both.
 """
 function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
+    D = length(𝒟.y[1])
 
     if typeof(𝒟.problem) <: Union{Sequential_KPP, Sequential_TKE}
         # Predict temperature profile from start to finish without the training data.
@@ -41,6 +42,26 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
             postprocessed_prediction = vcat(postprocessed_prediction, post_pred_chunk)
             t += n_x
         end
+
+        # THIS WORKS TOO BUT SLOWER:
+        # gpr_prediction=Array{Array{Float64,1},1}(UndefInitializer(), 𝒟.Nt)
+        # postprocessed_prediction=Array{Array{Float64,1},1}(UndefInitializer(), 𝒟.Nt)
+        # kpp_pred = Array{Float64,1}(UndefInitializer(), D) # cache
+        # t=1 # time index
+        # for (problem, n_x) in 𝒟.all_problems # n_x: number of predictors (i.e. time steps) for that problem
+        #
+        #     postprocessed_prediction[t] = unscale(𝒟.x[t], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
+        #     gpr_prediction[t] = 𝒟.y[t] # residual -- should be zeros for this initial time step. Good sanity check.
+        #
+        #     for i in t:t+n_x-2
+        #         kpp_pred .= scale(problem.evolve_physics_model_fn(postprocessed_prediction[i]), problem.scaling)
+        #         gpr_prediction[i+1] = model_output(scale(postprocessed_prediction[i], problem.scaling), i, ℳ, 𝒟)
+        #         postprocessed_prediction[i+1] = postprocess_prediction(kpp_pred, gpr_prediction[i+1], problem)
+        #         𝒟.convective_adjust(postprocessed_prediction[i+1])
+        #     end
+        #
+        #     t += n_x
+        # end
 
     elseif typeof(𝒟.problem) <: ResidualProblem
         # Predict temperature profile from start to finish without the training data.
@@ -83,6 +104,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
 
             for i in 1:n_x-1
                 predictor = scale(post_pred_chunk[i], problem.scaling)
+                # println(model_output(predictor, t, ℳ, 𝒟))
                 gpr__pred_chunk[i+1] = model_output(predictor, t, ℳ, 𝒟)
                 post_pred_chunk[i+1] = postprocess_prediction(predictor, gpr__pred_chunk[i+1], problem)
                 𝒟.convective_adjust(post_pred_chunk[i+1])
