@@ -7,7 +7,8 @@ N=4
 train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 test = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 
-problem  = Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
+# problem  = Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
+problem  = Sequential("dT")
 
 train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2", "general_strat_12_profiles.jld2", "general_strat_16_profiles.jld2"]
 test = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]

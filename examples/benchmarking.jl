@@ -1,6 +1,7 @@
 using LearnConvection
 problem = Sequential("KPP"; parameters=KPP.Parameters())
 
+
 train = ["general_strat_32_profiles.jld2"]
 
 k = 2
@@ -14,6 +15,8 @@ kernel   = get_kernel(k, logγ, 0.0, distance)
 using BenchmarkTools
 @btime LearnConvection.GaussianProcess.model_output(𝒟.x[200], 𝒢)
 @btime 𝒢.kernel(𝒟.x[200], 𝒢.x_train[200])
+
+@btime 𝒢.kernel(𝒢.x_train[2], 𝒢.x_train[1])
 
 @btime predict(𝒢, 𝒟; postprocessed=true)
 

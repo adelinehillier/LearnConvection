@@ -149,8 +149,8 @@ function get_problem(problem, les, v, N², D, Nt)
             return Sequential_wT("wT")
 
         elseif problem.type == "KPP"
-            f = closure_free_convection_kpp(D, Δt, les)
-            evolve_physics_model_fn(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
+            f = closure_free_convection_kpp(problem.parameters, D, Δt, les, n_steps=1)
+            evolve_physics_model_fn(T⁰) = f(; T⁰=T⁰)[:,2]
             kpp_data = Array{Array{Float64,1},1}(UndefInitializer(), Nt)
             kpp_data[1] = custom_avg(v[:,1], D)
             for i in 1:Nt-1
@@ -160,8 +160,8 @@ function get_problem(problem, les, v, N², D, Nt)
 
         elseif problem.type == "TKE"
             # Use the LES profile at time index i to predict time index i+1 using TKE
-            f = closure_free_convection_tke(D, Δt, les)
-            evolve_physics_model_fn2(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
+            f = closure_free_convection_tke(problem.parameters, D, Δt, les, n_steps=1)
+            evolve_physics_model_fn2(T⁰) = f(; T⁰=T⁰)[:,2]
             tke_data = Array{Array{Float64,1},1}(UndefInitializer(), Nt)
             tke_data[1] = custom_avg(v[:,1], D)
             for i in 1:Nt-1
@@ -177,8 +177,8 @@ function get_problem(problem, les, v, N², D, Nt)
 
         if problem.type == "KPP"
             # Use the LES profile at time index i to predict time index i+1 using KPP
-            f = closure_free_convection_kpp(D, Δt, les)
-            evolve_physics_model_fn3(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
+            f = closure_free_convection_kpp(problem.parameters, D, Δt, les, n_steps=1)
+            evolve_physics_model_fn3(T⁰) = f(; T⁰=T⁰)[:,2]
             kpp_data = Array{Array{Float64,1},1}(UndefInitializer(), Nt)
             kpp_data[1] = custom_avg(v[:,1], D)
             for i in 1:Nt-1
@@ -188,8 +188,8 @@ function get_problem(problem, les, v, N², D, Nt)
 
         elseif problem.type == "TKE"
             # Use the LES profile at time index i to predict time index i+1 using TKE
-            f = closure_free_convection_tke(D, Δt, les)
-            evolve_physics_model_fn4(T⁰) = f(problem.parameters; T⁰=T⁰, n_steps=1)[:,2]
+            f = closure_free_convection_tke(problem.parameters, D, Δt, les, n_steps=1)
+            evolve_physics_model_fn4(T⁰) = f(; T⁰=T⁰)[:,2]
             tke_data = Array{Array{Float64,1},1}(UndefInitializer(), Nt)
             tke_data[1] = custom_avg(v[:,1], D)
             for i in 1:Nt-1
@@ -204,15 +204,15 @@ function get_problem(problem, les, v, N², D, Nt)
 
         if problem.type == "KPP"
             # Predict the full evolution of the temperature profile from the initial time step using KPP
-            f = closure_free_convection_kpp_full_evolution(D, Δt, les)
-            kpp_data = f(problem.parameters)
+            f = closure_free_convection_kpp_full_evolution(problem.parameters, D, Δt, les)
+            kpp_data = f()
             kpp_data = [kpp_data[:,i] for i in 1:Nt]
             return Slack_KPP("T", kpp_data)
 
         elseif problem.type == "TKE"
             # Predict the full evolution of the temperature profile from the initial time step using TKE
-            f = closure_free_convection_tke_full_evolution(D, Δt, les)
-            tke_data = f(problem.parameters)
+            f = closure_free_convection_tke_full_evolution(problem.parameters, D, Δt, les)
+            tke_data = f()
             tke_data = [tke_data[:,i] for i in 1:Nt]
             return Slack_TKE("T", tke_data)
 

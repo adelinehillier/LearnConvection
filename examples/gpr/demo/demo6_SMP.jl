@@ -40,18 +40,20 @@ for Q in Qs
 end
 end
 
-# problem = Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
-# Q = 1
-# hyp = [0.18402255361790298, 0.0034913174201650103, 0.001675888689295688]
-#
-# problem = Slack("KPP"; parameters=KPP.Parameters())
-# Q = 1
-# hyp = [0.21342375476405787, 0.03326860797873657, 0.00017668846294285946]
-#
-# 𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel=LearnConvection.GaussianProcess.SpectralMixtureProductI(hyp))
-# anim = animate_profile_and_model_output(𝒢, 𝒟_test)
-#
-# 𝒟_train = LearnConvection.Data.data(train, problem; D=32, N=4);
-# 𝒟_test = LearnConvection.Data.data(test, problem; D=32, N=4);
-#
-# gif(anim,"here$(typeof(problem))_$(problem.type)_Q_$(Q)_interpolation.gif")
+## Spectral Mixture Product
+
+problem = Slack("TKE"; parameters=TKEMassFlux.TKEParameters())
+Q = 1
+hyp = [0.18402255361790298, 0.0034913174201650103, 0.001675888689295688]
+
+problem = Slack("KPP"; parameters=KPP.Parameters())
+Q = 1
+hyp = [0.21342375476405787, 0.03326860797873657, 0.00017668846294285946]
+
+𝒢 = LearnConvection.GaussianProcess.model(𝒟_train; kernel=LearnConvection.GaussianProcess.SpectralMixtureProductI(hyp))
+anim = animate_profile_and_model_output(𝒢, 𝒟_test)
+
+𝒟_train = LearnConvection.Data.data(train, problem; D=32, N=4);
+𝒟_test = LearnConvection.Data.data(test, problem; D=32, N=4);
+
+gif(anim,"here$(typeof(problem))_$(problem.type)_Q_$(Q)_interpolation.gif")

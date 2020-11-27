@@ -113,6 +113,8 @@ function ReadJLD2_OceananigansData(filename)
     # hold the entries for easy constructor creation
     container = []
 
+    println(collect(les_data["grid"]["zC"]))
+
     # size of arrays
     Nz = length(collect(les_data["grid"]["zC"]))
     Nt = length(timeseries_keys)
@@ -131,6 +133,8 @@ function ReadJLD2_OceananigansData(filename)
     V = zeros(Nz, Nt)
     t = zeros(Nt)
 
+    println(Nz)
+
     #Second Order Statistics
     wT  = zeros(Nz, Nt)
     wS  = zeros(Nz, Nt)
@@ -142,6 +146,7 @@ function ReadJLD2_OceananigansData(filename)
     for j in 1:Nt
         # Fields
         key = timeseries_keys[j]
+        println(length(les_data["timeseries"]["T"][key]))
         @. T[:,j] = les_data["timeseries"]["T"][key][2:(end-1)]
         @. S[:,j] = les_data["timeseries"]["S"][key][2:(end-1)]
         @. U[:,j] = les_data["timeseries"]["u"][key][2:(end-1)]
@@ -279,6 +284,7 @@ function ReadNetCDF_OceananigansData(filename)
     z = Array(NetCDF.open(filename, "zC"))
     t = Array(NetCDF.open(filename, "time"))
     sim_day = t ./ 86400
+
     z = (z[2:end] + z[1:end-1]) / 2
 
     vectify(x) = [x[i] for i in 1:length(x)]

@@ -12,7 +12,7 @@ include("../les/custom_avg.jl")
 export custom_avg
 
 # harvesting Oceananigans data
-include("../les/get_les_data.jl")
+include("../les/read_les_output.jl")
 export get_les_data
 
 # normalization

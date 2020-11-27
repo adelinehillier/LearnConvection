@@ -4,7 +4,6 @@ using Plots
 D=32
 N=4
 
-
 ## Interpolation
 
 train = ["general_strat_4_profiles.jld2", "general_strat_32_profiles.jld2"]
@@ -20,7 +19,10 @@ test  = ["general_strat_28_profiles.jld2", "general_strat_32_profiles.jld2"]
 train = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 test  = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 
-##
+## LESbrary data
+
+train = ["free_convection", "strong_wind", "strong_wind_no_coriolis"]
+test = ["weak_wind_strong_cooling", "strong_wind_weak_cooling", "strong_wind_weak_heating"]
 
 problem  = Sequential("T")
 problem  = Sequential("dT")

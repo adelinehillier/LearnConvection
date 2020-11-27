@@ -29,7 +29,7 @@ function predict(ℳ, 𝒟::ProfileData; postprocessed=true)
             post_pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
             gpr__pred_chunk = Array{Array{Float64,1},1}(UndefInitializer(), n_x)
             post_pred_chunk[1] = unscale(𝒟.x[t], problem.scaling) # should = unscale(𝒟.x[i], problem.scaling) = postprocess_prediction(𝒟.x[i], 𝒟.y[i], problem)
-            gpr__pred_chunk[1] = 𝒟.y[t] # residual -- should be zeros for this initial time step. Good sanity check.
+            gpr__pred_chunk[1] = 𝒟.y[t] # residual -- should be zeros for this initial time step.
 
             for i in 1:n_x-1
                 kpp_pred = scale(problem.evolve_physics_model_fn(post_pred_chunk[i]), problem.scaling)

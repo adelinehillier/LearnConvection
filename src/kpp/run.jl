@@ -30,27 +30,32 @@ closure_free_convection(N, Δt, les::OceananigansData; subsample = 1, grid = 1)
     𝑪[3]: Diffusivity Amplitude \n
     𝑪[4]: Shear Constant \n
 """
-function closure_free_convection_kpp_full_evolution(D, Δt, les::OceananigansData;
+function closure_free_convection_kpp_full_evolution(parameters, D, Δt, les::OceananigansData;
                                      subsample = 1, grid = 1)
+     # # set parameters
+     # parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
+     # Build the model with a Backward Euler timestepper
+     constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
+     model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
+     # Get grid if necessary
+     if grid != 1
+         zp = collect(model.grid.zc)
+         @. grid  = zp
+     end
+
+     # Set boundary conditions
+     model.bcs.T.top = FluxBoundaryCondition(les.top_T)
+     model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
+
     # define the closure
-    function free_convection(parameters)
-        # # set parameters
-        # parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
-        # Build the model with a Backward Euler timestepper
-        constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
-        model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
-        # Get grid if necessary
-        if grid != 1
-            zp = collect(model.grid.zc)
-            @. grid  = zp
-        end
+    function free_convection()
         # get average of initial condition of LES
         T⁰ = custom_avg(les.T⁰, D)
         # set equal to initial condition of parameterization
         model.solution.T[1:D] = copy(T⁰)
-        # Set boundary conditions
-        model.bcs.T.top = FluxBoundaryCondition(les.top_T)
-        model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
+        # # Set boundary conditions
+        # model.bcs.T.top = FluxBoundaryCondition(les.top_T)
+        # model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
         # set aside memory
         if subsample != 1
             time_index = subsample
@@ -73,41 +78,52 @@ function closure_free_convection_kpp_full_evolution(D, Δt, les::OceananigansDat
 end
 
 
-function closure_free_convection_kpp(D, Δt, les::OceananigansData;
-                                     subsample = 1, grid = 1)
+function closure_free_convection_kpp(parameters, D, Δt, les::OceananigansData;
+                                     subsample = 1, grid = 1, n_steps=1)
+
+     # # set parameters
+     # parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
+     # Build the model with a Backward Euler timestepper
+     constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
+     model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
+     # Get grid if necessary
+     if grid != 1
+         zp = collect(model.grid.zc)
+         @. grid  = zp
+     end
+     # Set boundary conditions
+     model.bcs.T.top = FluxBoundaryCondition(les.top_T)
+     model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
+
+     # set aside memory
+     if subsample != 1
+         time_index = subsample
+     else
+         time_index = 1:length(les.t)
+     end
+
+     Nt = length(les.t[time_index])
+
+     # loop the model
+     ti = collect(time_index)
+     ts = [les.t[ti[i]] for i in 1:n_steps+1]
+     𝒢 = zeros(D, n_steps+1)
+
     # define the closure
-    function evolve_forward(parameters; T⁰=T⁰, n_steps = 1)
-        # # set parameters
-        # parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4])
-        # Build the model with a Backward Euler timestepper
-        constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
-        model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
-        # Get grid if necessary
-        if grid != 1
-            zp = collect(model.grid.zc)
-            @. grid  = zp
-        end
+    function evolve_forward(; T⁰=T⁰)
+
         # average the initial condition
         T⁰ = custom_avg(T⁰, D)
-        # set equal to initial condition of parameterization
-        model.solution.T[1:D] = copy(T⁰)
-        # Set boundary conditions
-        model.bcs.T.top = FluxBoundaryCondition(les.top_T)
-        model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
-        # set aside memory
-        if subsample != 1
-            time_index = subsample
-        else
-            time_index = 1:length(les.t)
-        end
-        Nt = length(les.t[time_index])
-        𝒢 = zeros(D, n_steps+1)
 
-        # loop the model
-        ti = collect(time_index)
+        # set equal to initial condition of parameterization
+        model.solution.T[1:D] = T⁰
+        # # Set boundary conditions
+        # model.bcs.T.top = FluxBoundaryCondition(les.top_T)
+        # model.bcs.T.bottom = GradientBoundaryCondition(les.bottom_T)
+
         for i in 1:n_steps+1
-            t = les.t[ti[i]]
-            run_until!(model, Δt, t)
+            # t = les.t[ti[i]]
+            run_until!(model, Δt, ts[i])
             @. 𝒢[:,i] = model.solution.T[1:D]
         end
         return 𝒢
@@ -141,18 +157,19 @@ closure_free_convection_flexible(N, Δt, les::OceananigansData; subsample = 1, g
 """
 function closure_free_convection_flexible(D, Δt, les::OceananigansData;
                                  subsample = 1, grid = 1, power = 0.0)
+     # set parameters
+     parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4], CKE2 = 𝑪[5], CKE3 = 𝑪[6], CKE4 = power)
+     # Build the model with a Backward Euler timestepper
+     constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
+     model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
+     # Get grid if necessary
+     if grid != 1
+         zp = collect(model.grid.zc)
+         @. grid  = zp
+     end
+
     # define the closure
     function free_convection(𝑪)
-        # set parameters
-        parameters = KPP.Parameters( CSL = 𝑪[1], CNL = 𝑪[2], Cb_T = 𝑪[3], CKE = 𝑪[4], CKE2 = 𝑪[5], CKE3 = 𝑪[6], CKE4 = power)
-        # Build the model with a Backward Euler timestepper
-        constants = Constants(Float64; α = les.α , β = les.β, ρ₀= les.ρ, cP=les.cᵖ, f=les.f⁰, g=les.g)
-        model = KPP.Model(N=D, H=les.L, stepper=:BackwardEuler, constants = constants, parameters = parameters)
-        # Get grid if necessary
-        if grid != 1
-            zp = collect(model.grid.zc)
-            @. grid  = zp
-        end
         # get average of initial condition of LES
         T⁰ = custom_avg(les.T⁰, N)
         # set equal to initial condition of parameterization
