@@ -68,9 +68,9 @@ using OceanTurb
 export KPP, TKEMassFlux
 
 # submodules
-include("data/Data.jl")
-include("gpr/GaussianProcess.jl")
-include("main/Main.jl")
+include("Data/Data.jl")
+include("GaussianProcess/GaussianProcess.jl")
+include("Main/Main.jl")
 
 using .Data
 using .GaussianProcess
