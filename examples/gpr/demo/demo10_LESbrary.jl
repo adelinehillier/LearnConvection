@@ -21,8 +21,34 @@ test  = ["general_strat_4_profiles.jld2", "general_strat_8_profiles.jld2"]
 
 ## LESbrary data
 
+# momentum flux and buoyancy flux separate vs combined
 train = ["free_convection", "strong_wind", "strong_wind_no_coriolis"]
 test = ["weak_wind_strong_cooling", "strong_wind_weak_cooling", "strong_wind_weak_heating"]
+
+# A
+train = ["weak_wind_strong_cooling", "strong_wind", "strong_wind_no_coriolis", "strong_wind_weak_cooling", "strong_wind_weak_heating"]
+test = ["free_convection"]
+
+# B
+train = ["free_convection", "strong_wind", "strong_wind_no_coriolis", "strong_wind_weak_cooling", "strong_wind_weak_heating"]
+test = ["weak_wind_strong_cooling"]
+
+# C
+train = ["free_convection", "weak_wind_strong_cooling", "strong_wind_no_coriolis", "strong_wind_weak_cooling", "strong_wind_weak_heating"]
+test = ["strong_wind"]
+
+# D
+train = ["free_convection", "weak_wind_strong_cooling", "strong_wind", "strong_wind_weak_cooling", "strong_wind_weak_heating"]
+test = ["strong_wind_no_coriolis"]
+
+# E
+train = ["free_convection", "weak_wind_strong_cooling", "strong_wind", "strong_wind_no_coriolis", "strong_wind_weak_heating"]
+test = ["strong_wind_weak_cooling"]
+
+# F
+train = ["free_convection", "weak_wind_strong_cooling", "strong_wind", "strong_wind_no_coriolis", "strong_wind_weak_cooling"]
+test = ["strong_wind_weak_heating"]
+
 
 problem  = Sequential("T")
 problem  = Sequential("dT")
@@ -30,7 +56,7 @@ problem  = Residual("KPP"; parameters=KPP.Parameters())
 problem  = Residual("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("TKE"; parameters=TKEMassFlux.TKEParameters())
 problem  = Sequential("KPP"; parameters=KPP.Parameters())
-problem  = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
+# problem  = Sequential("dT"; modify_predictor_fn=partial_temp_profile(1:16))
 
 default_modify_predictor_fn(x, 𝒟, time_index) = x
 problem = Slack("KPP"; parameters=KPP.Parameters(), modify_predictor_fn=default_modify_predictor_fn)

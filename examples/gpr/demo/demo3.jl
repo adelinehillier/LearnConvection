@@ -4,6 +4,12 @@ using Plots
 D=32
 N=4
 
+filename = "general_strat_4_profiles.jld2"
+
+les = read_les_output(filename)
+
+les.ρ
+les.cᵖ
 
 ## Interpolation
 
