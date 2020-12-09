@@ -34,7 +34,7 @@ D        = 32                                 # collapse profile data vector dow
 N        = 4                                  # collect every 4 timesteps' data for training
 ```
 
-The `ProfileData` object is constructed using the `data` function (or manually: see `src/data/Data.jl` where the ProfileData struct is defined).
+The `ProfileData` object is constructed using the `data` function (or manually: see `src/Data/Data.jl` where the ProfileData struct is defined).
 
 ```julia
 𝒟 = LearnConvection.Data.data(filename, problem; D=D, N=N)
