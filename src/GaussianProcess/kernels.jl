@@ -45,12 +45,9 @@ end
 
 struct Matern12I <: Kernel
     # Hyperparameters
-    "Length scale"
-    γ::Float64
-    "Signal variance"
-    σ::Float64
-    "Distance metric"
-    d::Function
+    γ::Float64 #length scale
+    σ::Float64 #signal variance
+    d::Function #distance metric
 end
 
 function kernel_function(k::Matern12I; z=nothing)
@@ -64,12 +61,9 @@ end
 
 struct Matern32I <: Kernel
     # Hyperparameters
-    # "Length scale"
-    γ::Float64
-    # "Signal variance"
-    σ::Float64
-    # "Distance metric"
-    d::Function
+    γ::Float64 #length scale
+    σ::Float64 #signal variance
+    d::Function #distance metric
 end
 
 function kernel_function(k::Matern32I; z=nothing)
@@ -86,12 +80,9 @@ end
 
 struct Matern52I <: Kernel
     # Hyperparameters
-    # "Length scale"
-    γ::Float64
-    # "Signal variance"
-    σ::Float64
-    # "Distance metric"
-    d::Function
+    γ::Float64 #length scale
+    σ::Float64 #signal variance
+    d::Function #distance metric
 end
 
 function kernel_function(k::Matern52I; z=nothing)
@@ -109,14 +100,10 @@ end
 
 struct RationalQuadraticI <: Kernel
     # Hyperparameters
-    "Length scale"
-    γ::Float64
-    "Signal variance"
-    σ::Float64
-    "Shape parameter"
-    α::Float64
-    "Distance metric"
-    d::Function
+    γ::Float64 #length scale
+    σ::Float64 #signal variance
+    α::Float64 #shape parameter
+    d::Function #distance metric
 end
 
 function kernel_function(k::RationalQuadraticI; z=nothing)
@@ -132,12 +119,9 @@ function kernel_function(k::RationalQuadraticI; z=nothing)
 end
 
 struct SpectralMixtureProductI <: Kernel
-    # """Mixture weights"""
-    w::Array{Float64}
-    # """Spectral means"""
-    μ::Array{Float64}
-    # """Spectral variances"""
-    γ::Array{Float64}
+    w::Array{Float64} #mixture weights
+    μ::Array{Float64} #spectral means
+    γ::Array{Float64} #spectral variances
 end
 
 function SpectralMixtureProductI(hyp)
@@ -172,12 +156,9 @@ function kernel_function(k::SpectralMixtureProductI; z=nothing)
 end
 
 struct SpectralMixtureProductA <: Kernel
-    # """Mixture weights"""
-    w::Array{Float64} # D x Q array
-    # """Spectral means"""
-    μ::Array{Float64} # D x Q array
-    # """Spectral variances"""
-    γ::Array{Float64} # D x Q array
+    w::Array{Float64} # Mixture weights, D x Q array
+    μ::Array{Float64} # Spectral means, D x Q array
+    γ::Array{Float64} # Spectral variances, D x Q array
 end
 
 function SpectralMixtureProductA(hyp, D)
@@ -222,10 +203,6 @@ end
 # """
 
 #
-
-# function 🍮(🍨, 🍳, 😎)
-#     🍨 + 🍳+ 😎
-# end
 
 ##
 # function SMP(Q,hyp,a,b)

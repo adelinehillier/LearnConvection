@@ -8,17 +8,25 @@ module Data
 using OceanTurb
 using OrderedCollections
 
-include("../les/custom_avg.jl")
+include("../LES/custom_avg.jl")
 export custom_avg
 
 # harvesting Oceananigans data
-include("../les/read_les_output.jl")
+include("../LES/read_les_output.jl")
 export get_les_data
+
+# running OceanTurb KPP simulations based on OceananigansData conditions
+include("../KPP/run.jl")
+export closure_free_convection_kpp_full_evolution,
+       closure_free_convection_kpp
+
+# running OceanTurb TKE simulations based on OceananigansData conditions
+include("../TKE/run.jl")
+export closure_free_convection_tke_full_evolution,
+       closure_free_convection_tke
 
 # normalization
 include("scalings.jl")
-# export  Tscaling,
-#         wTscaling
 export  min_max_scaling,
         scale, # normalize
         unscale # un-normalize
@@ -50,16 +58,6 @@ export append_tke,
 
 include("convective_adjust.jl")
 export convective_adjust!
-
-# running OceanTurb KPP simulations based on OceananigansData conditions
-include("../kpp/run.jl")
-export closure_free_convection_kpp_full_evolution,
-       closure_free_convection_kpp
-
-# running OceanTurb TKE simulations based on OceananigansData conditions
-include("../tke/run.jl")
-export closure_free_convection_tke_full_evolution,
-       closure_free_convection_tke
 
 # ProfileData struct
 export  ProfileData,
@@ -93,9 +91,11 @@ ProfileData
     zavg::Array,        length-D vector; depth values averaged to D gridpoints
     t::Array,           timeseries [seconds]
     Nt::Int64,          length(timeseries)
-    state_variables
     problem::Problem,   what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"), Residual("T"), Residual("KPP"), or Residual("TKE"))
-
+    all_problems::Array{Array{Any,1},1}
+    state_variables::StateVariables
+    modify_predictor_fn::Function
+    convective_adjust::Function
 """
 struct ProfileData
     v       ::Array{Float64,2}

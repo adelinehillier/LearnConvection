@@ -44,12 +44,12 @@ function model(𝒟::ProfileData; kernel::Kernel = Kernel(), stencil_size=)
 end
 
 """
-prediction(x, 𝒢::GP)
+model_output(x, 𝒢::GP_multiple)
 # Description
 - Given state x, GP 𝒢, returns the mean GP prediction
 # Arguments
 - `x`: single scaled state
-- `𝒢`: GP object with which to make the prediction
+- `𝒢`: GP_multiple object with which to make the prediction
 # Return
 - `y`: scaled prediction
 """

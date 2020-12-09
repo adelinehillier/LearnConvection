@@ -11,41 +11,6 @@ function sq_mag(a,b) # ||a - b||^2
     return ll
 end
 
-# abstract type Distance end
-#
-# """
-# EuclideanDistance: computes the Euclidean distance (l²-norm) between two vectors
-# EuclideanDistance(x,x') = || x - x' ||
-# """
-# mutable struct EuclideanDistance
-#     zavg::Array
-#     EuclideanDistance() = EuclideanDistance
-#     EuclideanDistance(zavg) = new(zavg)
-#     EuclideanDistance(a,b) = sqrt(sq_mag(a,b))
-# end
-#
-# """
-# DerivativeDistance: computes the H¹-norm w.r.t z of two vectors
-# DerivativeDistance(x,x') = || diff(x)./diff(z) - diff(x')./diff(z) ||
-# """
-# Base.@kwdef struct DerivativeDistance
-#     zavg::Array
-#     DerivativeDistance() = DerivativeDistance
-#     DerivativeDistance(zavg) = new(zavg)
-#     DerivativeDistance(a,b) = sqrt(sq_mag( δ(a, zavg), δ(b, zavg) ))
-# end
-#
-# """
-# AntiderivativeDistance: computes the H⁻¹-norm w.r.t z of two vectors
-# AntiderivativeDistance(x,x') = || diff(x).*diff(z) - diff(x').*diff(z) ||
-# """
-# Base.@kwdef struct AntiderivativeDistance
-#     zavg::Array
-#     AntiderivativeDistance() = AntiderivativeDistance
-#     AntiderivativeDistance(zavg) = new(zavg)
-#     AntiderivativeDistance(a,b) = sqrt(sq_mag((diff(a).*diff(zavg) , diff(b).*diff(zavg))))
-# end
-
 """
 euclidean_distance: computes the Euclidean distance (l²-norm) between two vectors
 """

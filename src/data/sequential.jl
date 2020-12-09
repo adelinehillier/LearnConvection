@@ -2,6 +2,18 @@
 Data pre- / post-processing for sequential problems. Takes a ProfileData object and prepares it for use in GP.
 """
 
+"""
+`get_predictors_targets(vavg::Array, problem::Sequential_T)`
+# Description
+    Returns x and y, the scaled predictor and target pairs from which to extract the training and verification data sets for "T" profiles.
+
+    model( predictor ) -> target
+         model( T[i] ) -> (T[i+1]-T[i])/Δt ≈ ∂t(T)
+
+# Arguments
+- `vavg`: (Array)                Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
+- `problem`: (Sequential_dT)     Sequential_T object associated with the data (output of get_problem)
+
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 # | Sequential_dT                              |
 # |                                            |
@@ -15,17 +27,6 @@ Data pre- / post-processing for sequential problems. Takes a ProfileData object 
 # |   predicted T[i+1] = model(T[i])Δt + T[i]  |
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 
-"""
-`get_predictors_targets(vavg::Array, problem::Sequential_T)`
-# Description
-    Returns x and y, the scaled predictor and target pairs from which to extract the training and verification data sets for "T" profiles.
-
-    model( predictor ) -> target
-         model( T[i] ) -> (T[i+1]-T[i])/Δt ≈ ∂t(T)
-
-# Arguments
-- `vavg`: (Array)                Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
-- `problem`: (Sequential_dT)     Sequential_T object associated with the data (output of get_problem)
 """
 function get_predictors_targets(vavg::Array, problem::Sequential_dT)
 
@@ -66,11 +67,6 @@ function postprocess_prediction(predictor, model_output, problem::Sequential_dT)
 
 end
 
-# *--*--*--*--*--*--*--*--*--*--*
-# | Sequential_T                |
-# |   T[i] --model--> T[i+1]    |
-# *--*--*--*--*--*--*--*--*--*--*
-
 """
 `get_predictors_targets(vavg::Array, problem::Sequential_T)`
 
@@ -83,6 +79,11 @@ end
 # Arguments
 - `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
 - `problem`: (Sequential_T)     Sequential_T object associated with the data (output of get_problem)
+
+# *--*--*--*--*--*--*--*--*--*--*
+# | Sequential_T                |
+# |   T[i] --model--> T[i+1]    |
+# *--*--*--*--*--*--*--*--*--*--*
 """
 function get_predictors_targets(vavg, problem::Sequential_T)
 
@@ -121,11 +122,6 @@ function postprocess_prediction(predictor, prediction, problem::Sequential_T)
     return [unscale(vec, problem.scaling) for vec in prediction]
 end
 
-# *--*--*--*--*--*--*--*--*--*--*
-# | Sequential_wT               |
-# |   wT[i] --model--> wT[i+1]  |
-# *--*--*--*--*--*--*--*--*--*--*
-
 """
 `get_predictors_targets(vavg, problem::Sequential_wT)`
 
@@ -138,6 +134,11 @@ end
 # Arguments
 - `vavg`: (Array)                  Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
 - `problem`: (Sequential_wT)       Sequential_wT object associated with the data (output of get_problem)
+
+# *--*--*--*--*--*--*--*--*--*--*
+# | Sequential_wT               |
+# |   wT[i] --model--> wT[i+1]  |
+# *--*--*--*--*--*--*--*--*--*--*
 """
 function get_predictors_targets(vavg, problem::Sequential_wT)
 
@@ -175,6 +176,19 @@ function postprocess_prediction(predictor, prediction, problem::Sequential_wT)
     return prediction
 end
 
+"""
+get_predictors_targets(vavg::Array, problem::Residual_KPP)
+# Description
+    Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
+    Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
+
+    model( predictors ) = targets
+    model( KPP(T[i])  ) = T[i] - KPP(T[i])
+
+# Arguments
+- `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
+-  `problem`: (Residual_KPP)    Residual_KPP object associated with the data (output of get_problem)
+
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 # | Residual_KPP                                     |
 # |                                                  |
@@ -198,19 +212,6 @@ end
 # |                                                  |
 # |   predicted T[i] = model(TKE(T[i])) + TKE(T[i])  |
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
-
-"""
-get_predictors_targets(vavg::Array, problem::Residual_KPP)
-# Description
-    Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
-    Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
-
-    model( predictors ) = targets
-    model( KPP(T[i])  ) = T[i] - KPP(T[i])
-
-# Arguments
-- `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
--  `problem`: (Residual_KPP)    Residual_KPP object associated with the data (output of get_problem)
 """
 function get_predictors_targets(vavg::Array, problem::Union{Sequential_KPP, Sequential_TKE})
 

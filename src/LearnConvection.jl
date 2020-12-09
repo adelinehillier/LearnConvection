@@ -18,9 +18,7 @@ export
         partial_temp_profile,
 
         # GaussianProcess / gp.jl
-        # construct_gpr,
         uncertainty,
-        # model,
 
         # GaussianProcess / kernels.jl
         Kernel,
@@ -57,19 +55,11 @@ export
         # Main / optimize_smp.jl
         optimize_SMP_kernel
 
-        # kernel options
-        #  1   =>   "Squared exponential"         => "Squared exponential kernel:        k(x,x') = σ * exp( - ||x-x'||² / 2γ² )",
-        #  2   =>   "Matern 1/2"                  => "Matérn with ʋ=1/2:                 k(x,x') = σ * exp( - ||x-x'|| / γ )",
-        #  3   =>   "Matern 3/2"                  => "Matérn with ʋ=3/2:                 k(x,x') = σ * (1+c) * exp(-√(3)*||x-x'||)/γ)",
-        #  4   =>   "Matern 5/2"                  => "Matérn with ʋ=5/2:                 k(x,x') = σ * ( 1 + √(5)*||x-x'||)/γ + 5*||x-x'||²/(3*γ^2) ) * exp(-√(5)*||x-x'||)/γ)",
-        #  5   =>   "Rational quadratic w/ α=1"   => "Rational quadratic kernel:         k(x,x') = σ * (1+(x-x')'*(x-x')/(2*α*(γ²))^(-α)",
-
 # modules
 using Plots,
       JLD2,
       NetCDF,
       Statistics,
-      # LinearAlgebra,
       BenchmarkTools,
       Optim
 

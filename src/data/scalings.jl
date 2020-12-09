@@ -10,7 +10,6 @@ end
 
 # scale: scales the data so that it ranges from 0 to 1.
 scale(x, scaling::min_max_scaling) = (x .- scaling.v_min) ./ scaling.Δv
-# scale(x, scaling::min_max_scaling) = (x - scaling.v_min) / scaling.Δv
 
 # unscale: undo scale
 unscale(x, scaling::min_max_scaling) = (x .* scaling.Δv) .+ scaling.v_min

@@ -9,8 +9,6 @@ updated for latest version of OceanTurb
 # include("../les/get_les_data.jl")
 # include("../data/scalings.jl")
 
-# using OceanTurb
-
 """
 closure_free_convection(N, Δt, les::OceananigansData; subsample = 1, grid = 1)
 # Description

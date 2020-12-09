@@ -17,6 +17,7 @@ GP
     α::𝒮2 , an array
     K::𝒰 , matrix or sparse matrix
     CK::𝒱, cholesky factorization of K
+    cache::𝒜, cache vector
 """
 struct GP{Kernel, 𝒮, 𝒮2, 𝒰, 𝒱, 𝒜}
     kernel::Kernel
@@ -34,7 +35,9 @@ GP_multiple
 # Data Structure and Description
     GPs, Array of GP objects
     kernel, Kernel object
-    x_train
+    x_train, an array of vectors (n-length array of D-length vectors)
+    stencil_size, scalar stencil length from 1 to the number of gridpoints
+    stencil_ranges, index ranges at which to slice a profile
 """
 struct GP_multiple
     GPs::Array{GP}
@@ -138,7 +141,7 @@ function model(𝒟::ProfileData; kernel::Kernel = Kernel(), stencil_size::Int64
 end
 
 """
-prediction(x, 𝒢::GP)
+model_output(x, 𝒢::GP)
 # Description
 - Given state x, GP 𝒢, returns the mean GP prediction
 # Arguments
@@ -159,7 +162,7 @@ function model_output(x, 𝒢::GP)
 end
 
 """
-prediction(x, 𝒢::GP_multiple)
+model_output(x, 𝒢::GP_multiple)
 # Description
 - Given state x, GP_multiple 𝒢, returns the mean GP prediction
 # Arguments
@@ -179,6 +182,7 @@ uncertainty(x, 𝒢::GP)
 - Given state x and GP 𝒢, output the variance at a point
 # Arguments
 - `x`: state
+- `𝒢`: GP object
 # Return
 - `var`: variance
 """

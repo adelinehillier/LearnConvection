@@ -29,22 +29,6 @@ This example uses the ResidualData struct and GP.
 # using Statistics, LinearAlgebra, Plots
 # include("GP.jl")
 
-"""
-ProfileData
-# Description
-- data structure for preparing profile data from Oceananigans simulations for analysis with gpr, nn, or ed.
-# Data Structure and Description
-    v::Array,
-    x::Array,
-    y::Array,
-    x_train::Array, training inputs (predictors; array of states). (length-n array of D-length vectors, where D is the length of each input n is the number of training points)
-    y_train::Array, training outputs (predictions) (length-n array of D-length vectors).
-    x_verification::Array
-    y_verification::Array
-    z::Vector, depth values averaged to D gridpoints
-    t::Array, timeseries [seconds]
-    Nt::Int64, length(timeseries)
-"""
 struct ResidualData
     truth
     approx
@@ -52,18 +36,6 @@ end
 
 # get_truth(𝒟::ProfileData, 𝒢::GP)
 
-"""
-construct_profile_data(filename, D; N=4)
-# Description
-Returns an instance of ProfileData.
-# Arguments
-- 'data': (string). ProfileData instance containing wT profile data
-- 'D' (integer). Number of gridpoints in the z direction to average the data to.
-# Keyword Arguments
-- 'N': (integer). Interval between the timesteps to be reserved for training data (default 4).
-                If N=4, the profile data for every 4 timesteps will be reserved for training (~25% training data);
-                the rest will be used in the verification set.
-"""
 δ(ϕ, z) = diff(ϕ) ./ diff(z)
 
 function construct_residual_data(filename, D; N=4)

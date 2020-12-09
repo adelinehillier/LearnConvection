@@ -2,6 +2,19 @@
 Data pre- / post-processing for Slack problems. Takes a ProfileData object and prepares it for use in GP.
 """
 
+"""
+get_predictors_targets(vavg::Array, problem::Slack_KPP)
+# Description
+    Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
+    Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
+
+    model( predictors ) = targets
+    model( KPP(T[i])  ) = T[i] - KPP(T[i])
+
+# Arguments
+- `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
+-  `problem`: (Slack_KPP)    Slack_KPP object associated with the data (output of get_problem)
+
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 # | Slack_KPP                                     |
 # |                                                  |
@@ -25,19 +38,6 @@ Data pre- / post-processing for Slack problems. Takes a ProfileData object and p
 # |                                                  |
 # |   predicted T[i] = model(TKE(T[i])) + TKE(T[i])  |
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
-
-"""
-get_predictors_targets(vavg::Array, problem::Slack_KPP)
-# Description
-    Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
-    Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
-
-    model( predictors ) = targets
-    model( KPP(T[i])  ) = T[i] - KPP(T[i])
-
-# Arguments
-- `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
--  `problem`: (Slack_KPP)    Slack_KPP object associated with the data (output of get_problem)
 """
 function get_predictors_targets(vavg::Array, problem::Union{Slack_KPP, Slack_TKE})
 

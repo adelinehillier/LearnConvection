@@ -127,10 +127,11 @@ get_problem(problem::Problem, data::OceananigansData, timeseries)
     Returns the problem and the correct data array from the OceananigansData objectssociated with the variable of interest.
 # Arguments
 - 'problem': (Problem).      what mapping you wish to evaluate with the model. (Sequential("T"), Sequential("wT"))
-- 'v': (Array).              Array of values
 - 'les': (OceananigansData). LES simulation output
+- 'v': (Array).              Array of values
 - 'N²': (Number)             initial buoyancy stratification
 - 'D': (Number)              number of grid points in the vertical
+- 'Nt': (Integer)            number of time steps
 """
 function get_problem(problem, les, v, N², D, Nt)
 

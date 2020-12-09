@@ -2,6 +2,19 @@
 Data pre- / post-processing for residual problems. Takes a ProfileData object and prepares it for use in GP.
 """
 
+"""
+get_predictors_targets(vavg::Array, problem::Union{Residual_KPP, Residual_TKE})
+# Description
+    Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
+    Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
+
+    model( predictors ) = targets
+    model( KPP(T[i])  ) = T[i] - KPP(T[i])
+
+# Arguments
+- `vavg`: (Array)      Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
+-  `problem`: (Union{Residual_KPP, Residual_TKE})    Residual_KPP object associated with the data (output of get_problem)
+
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 # | Residual_KPP                                     |
 # |                                                  |
@@ -26,18 +39,6 @@ Data pre- / post-processing for residual problems. Takes a ProfileData object an
 # |   predicted T[i] = model(TKE(T[i])) + TKE(T[i])  |
 # *--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*--*
 
-"""
-get_predictors_targets(vavg::Array, problem::Residual_KPP)
-# Description
-    Returns x and y, the scaled predictors and target predictions from which to extract the training and verification data for temperature profiles.
-    Scales the predictors and targets using min-max scaling based on the initial temperature profile from the les simulation.
-
-    model( predictors ) = targets
-    model( KPP(T[i])  ) = T[i] - KPP(T[i])
-
-# Arguments
-- `vavg`: (Array)               Nt-length array of D-length vectors. Data from which to extract x and y, the predictors and corresponding predictions.
--  `problem`: (Residual_KPP)    Residual_KPP object associated with the data (output of get_problem)
 """
 function get_predictors_targets(vavg::Array, problem::Union{Residual_KPP, Residual_TKE})
 
